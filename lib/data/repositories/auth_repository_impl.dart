@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:crypt/crypt.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
@@ -12,7 +13,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      print(' [Supabase Login] Intentando iniciar sesión para: $email');
+      print('=== Intentando login: $email ===');
 
       final AuthResponse response = await _supabaseClient.auth.signInWithPassword(
         email: email,
@@ -20,9 +21,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       final userUuid = response.user?.id;
-      if (userUuid == null) throw Exception('No se pudo obtener el ID único del usuario.');
-
-      print('[Supabase Login] Auth exitoso en la nube. Buscando perfil de usuario...');
+      if (userUuid == null) throw Exception('No se obtuvo el UUID del usuario.');
 
       final List<Map<String, dynamic>> data = await _supabaseClient
           .from('usuarios')
@@ -30,18 +29,16 @@ class AuthRepositoryImpl implements AuthRepository {
           .eq('auth_id', userUuid); 
 
       if (data.isEmpty) {
-        throw Exception('El usuario está autenticado, pero no se encontró su perfil en la base de datos.');
+        throw Exception('Perfil de usuario no encontrado.');
       }
-
-      print('[Supabase Login] Perfil extraído con éxito: ${data.first}');
       
       return data.first;
 
     } on AuthException catch (e) {
-      print('[Supabase Auth Login Error]: ${e.message}');
+      print('Error Auth Login: ${e.message}');
       throw Exception(e.message);
     } catch (e) {
-      print('[Supabase Unexpected Login Error]: ${e.toString()}');
+      print('Error Inesperado Login: $e');
       throw Exception('Ocurrió un error inesperado al iniciar sesión.');
     }
   }
@@ -51,10 +48,10 @@ class AuthRepositoryImpl implements AuthRepository {
     required String name,
     required String cedula,
     required String email,
-    required String password,
+    required String password, 
   }) async {
     try {
-      print('[Supabase Registro] Iniciando registro para: $email');
+      print('=== Iniciando registro: $email ===');
       
       final AuthResponse response = await _supabaseClient.auth.signUp(
         email: email,
@@ -62,33 +59,32 @@ class AuthRepositoryImpl implements AuthRepository {
         data: {'full_name': name}, 
       );
 
-      print('[Supabase Registro] Auth exitoso. ID generado: ${response.user?.id}');
-
       if (response.user != null) {
         final nameParts = name.trim().split(' ');
         final firstName = nameParts.isNotEmpty ? nameParts.first : name;
         final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
 
-        print('[Supabase Registro] Intentando insertar en tabla usuarios...');
+        final passwordhash = Crypt.sha256(password).toString(); 
         
         await _supabaseClient.from('usuarios').insert({
           'nombreUser': firstName,
           'apellidoUser': lastName,
           'correoUser': email,
+          'password_hash': passwordhash, 
           'auth_id': response.user!.id, 
           'cedula': cedula,
           'id_rol': 2,                  
           'activo': true,
         });
 
-        print('[Supabase Registro] ¡Usuario insertado con éxito en la tabla!');
+        print('Usuario registrado con éxito en la base de datos');
       }
     } on AuthException catch (e) {
-      print('[Supabase Auth Registro Error]: ${e.message}');
+      print('Error Auth Registro: ${e.message}');
       throw Exception(e.message);
     } catch (e) {
-      print('[Supabase Database Registro Error]: ${e.toString()}');
-      throw Exception('Error en base de datos: ${e.toString()}');
+      print('Error DB Registro: $e');
+      throw Exception('Error en base de datos: $e');
     }
   }
 }
