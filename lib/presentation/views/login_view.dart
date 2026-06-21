@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../domain/repositories/auth_repository.dart'; 
+import '../../domain/repositories/auth_repository.dart';
 import '../viewmodels/login_viewmodel.dart';
-import 'main_navigation_screen.dart'; 
-import 'register_screen.dart'; 
+import 'main_navigation_screen.dart';
+import 'register_screen.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -15,8 +15,8 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _localLoading = false; 
-  String _localError = '';    
+  bool _localLoading = false;
+  String _localError = '';
 
   @override
   void dispose() {
@@ -28,11 +28,11 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginViewModel>();
-    // Repositorio conectado a supa base 
+    // Repositorio conectado a supa base
     final authRepository = Provider.of<AuthRepository>(context, listen: false);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), 
+      backgroundColor: const Color(0xFFF8FAFC),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -55,21 +55,19 @@ class _LoginViewState extends State<LoginView> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 Container(
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 1, 8, 65),
-                    borderRadius: BorderRadius.circular(17), 
-                    border: Border.all(color:  Colors.grey, width: 1.5),                  
-                  ), 
+                    borderRadius: BorderRadius.circular(17),
+                    border: Border.all(color: Colors.grey, width: 1.5),
+                  ),
                   height: 80,
-                    width: 80,
-                    child: const Icon(
+                  width: 80,
+                  child: const Icon(
                     Icons.check_circle_outline,
                     color: Colors.white,
                     size: 50,
                   ),
-
                 ),
                 const SizedBox(height: 15),
 
@@ -169,7 +167,11 @@ class _LoginViewState extends State<LoginView> {
                 if (_localError.isNotEmpty) ...[
                   Text(
                     _localError,
-                    style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
@@ -181,48 +183,81 @@ class _LoginViewState extends State<LoginView> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(26),
                     gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF1D4ED8),
-                        Color(0xFF6D28D9),
-                      ],
+                      colors: [Color(0xFF1D4ED8), Color(0xFF6D28D9)],
                     ),
                   ),
                   child: ElevatedButton(
-                   // Modificación dentro del onPressed de tu botón en LoginView:
-onPressed: _localLoading
-    ? null
-    : () async {
-        setState(() {
-          _localLoading = true;
-          _localError = '';
-        });
+                    onPressed: _localLoading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _localLoading = true;
+                              _localError = '';
+                            });
 
-        try {
+                            try {
+                              final userData = await authRepository
+                                  .signInWithEmailAndPassword(
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text,
+                                  );
 
-          final userData = await authRepository.signInWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
+                              if (mounted) {
+                                viewModel.setCurrentUser(userData);
 
-          if (mounted) {
-            // viewModel.setCurrentUser(userData); 
-            
-            print('Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}');
+                                print(
+                                  'Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}',
+                                );
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('¡Bienvenido, ${userData['nombreUser']}!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-  );
-}
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '¡Bienvenido, ${userData['nombreUser']}!',
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+
+                                final int idRol = userData['id_rol'] ?? 1;
+
+                                switch (idRol) {
+                                  case 1:
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MainNavigationScreen(),
+                                      ),
+                                    );
+                                    break;
+                                  case 2:
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MainNavigationScreen(),
+                                      ),
+                                    );
+                                    break;
+                                  case 3:
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MainNavigationScreen(),
+                                      ),
+                                    );
+                                    break;
+                                  default:
+                                    throw Exception('Rol no autorizado');
+                                }
+                              }
                             } catch (e) {
                               setState(() {
-                                _localError = e.toString().replaceAll('Exception: ', '');
+                                _localError = e.toString().replaceAll(
+                                  'Exception: ',
+                                  '',
+                                );
                               });
                             } finally {
                               if (mounted) {
@@ -241,7 +276,10 @@ Navigator.pushReplacement(
                         ? const SizedBox(
                             width: 24,
                             height: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
                           )
                         : const Text(
                             'Iniciar Sesión',
