@@ -9,5 +9,6 @@ abstract class AuthRepository {
     required String cedula,
     required String email,
     required String password,
+    required String cellphone,
   });
 }
