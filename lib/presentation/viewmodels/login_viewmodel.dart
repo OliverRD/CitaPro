@@ -11,10 +11,13 @@ class LoginViewModel extends ChangeNotifier {
   bool _rememberMe = false;
   String _errorMessage = '';
 
+  Map<String, dynamic>? _currentUser;
+
   bool get isLoading => _isLoading;
   bool get obscurePassword => _obscurePassword;
   bool get rememberMe => _rememberMe;
   String get errorMessage => _errorMessage;
+  Map<String, dynamic>? get currentUser => _currentUser;
 
   void togglePasswordVisibility() {
     _obscurePassword = !_obscurePassword;
@@ -23,6 +26,11 @@ class LoginViewModel extends ChangeNotifier {
 
   void toggleRememberMe(bool? value) {
     _rememberMe = value ?? false;
+    notifyListeners();
+  }
+
+  void setCurrentUser(Map<String, dynamic> user) {
+    _currentUser = user;
     notifyListeners();
   }
 
