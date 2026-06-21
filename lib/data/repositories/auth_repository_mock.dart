@@ -26,10 +26,10 @@ class AuthRepositoryMock implements AuthRepository {
     required String cedula,
     required String email,
     required String password,
+    required String cellphone,
   }) async {
-    
     await Future.delayed(const Duration(milliseconds: 1500));
-    
+
     if (email.contains('error')) {
       throw Exception('Este correo ya está registrado.');
     }
