@@ -73,7 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
           'password_hash': passwordhash, 
           'auth_id': response.user!.id, 
           'cedula': cedula,
-          'id_rol': 2,                  
+          'id_rol': 2,                    
           'activo': true,
         });
 
@@ -85,6 +85,28 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       print('Error DB Registro: $e');
       throw Exception('Error en base de datos: $e');
+    }
+  }
+
+  // --- MÉTODO AGREGADO PARA GOOGLE SIGN-IN ---
+  @override
+  Future<void> signInWithGoogle() async {
+    try {
+      print('=== Iniciando sesión con Google ===');
+      
+      await _supabaseClient.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'citapro://login-callback',
+        queryParams: {
+          'prompt': 'select_account',
+        },
+      );
+    } on AuthException catch (e) {
+      print('Error Auth Google: ${e.message}');
+      throw Exception(e.message);
+    } catch (e) {
+      print('Error Inesperado Google: $e');
+      throw Exception('Ocurrió un error inesperado al iniciar con Google.');
     }
   }
 }

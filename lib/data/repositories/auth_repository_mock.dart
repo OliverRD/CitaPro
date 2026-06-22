@@ -27,12 +27,19 @@ class AuthRepositoryMock implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    
     await Future.delayed(const Duration(milliseconds: 1500));
-    
     if (email.contains('error')) {
       throw Exception('Este correo ya está registrado.');
     }
     return; // Éxito
+  }
+
+  // --- AQUÍ ESTÁ LA SOLUCIÓN AL ERROR ---
+  // Debes implementar este método aunque sea una simulación
+  @override
+  Future<void> signInWithGoogle() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    print('=== Mock: Inicio de sesión con Google exitoso ===');
+    return; // Simulación de éxito
   }
 }

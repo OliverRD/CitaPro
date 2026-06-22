@@ -26,6 +26,7 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Método de login normal (ya existente)
   Future<bool> login(String email, String password) async {
     _isLoading = true;
     _errorMessage = '';
@@ -42,5 +43,23 @@ class LoginViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  // MÉTODO NUEVO: Para el botón de Google
+  Future<void> signInWithGoogle() async {
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners();
+
+    try {
+      // Llamamos al caso de uso para ejecutar el login con Google
+      await _loginUseCase.executeGoogleLogin();
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _isLoading = false;
+      notifyListeners();
+    }
+    // Nota: No ponemos _isLoading = false aquí porque, al ser un 
+    // inicio de sesión externo, la app navegará automáticamente al Home.
   }
 }

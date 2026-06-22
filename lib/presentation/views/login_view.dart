@@ -5,14 +5,14 @@ import '../viewmodels/login_viewmodel.dart';
 import 'main_navigation_screen.dart'; 
 import 'register_screen.dart'; 
 
-class LoginView extends StatefulWidget {
+class LoginView extends StatefulWidget { 
   const LoginView({super.key});
 
   @override
   State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+  class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _localLoading = false; 
