@@ -4,49 +4,51 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ProfileViewModel extends ChangeNotifier {
   final SupabaseClient _supabaseClient = Supabase.instance.client;
 
-  bool _isLoading = false;
-  String _userName = 'Cargando...';
+  String _userName = '';
   String _userEmail = '';
+  bool _isLoading = true;
+  
+  // Bandera nativa para saber si el ViewModel fue destruido
+  bool _isDisposed = false;
 
-  bool get isLoading => _isLoading;
   String get userName => _userName;
   String get userEmail => _userEmail;
-
-  ProfileViewModel() {
-    loadUserData();
-  }
+  bool get isLoading => _isLoading;
 
   Future<void> loadUserData() async {
     try {
-      _isLoading = true;
-      notifyListeners();
+      if (_isDisposed) return;
 
       final user = _supabaseClient.auth.currentUser;
-      if (user != null) {
-        _userEmail = user.email ?? '';
-        
-        // Obtiene los datos del usuario desde la tabla de usuarios
-        final data = await _supabaseClient
-            .from('usuarios')
-            .select('nombreUser, apellidoUser')
-            .eq('auth_id', user.id)
-            .maybeSingle();
 
-        if (data != null) {
-          _userName = '${data['nombreUser']} ${data['apellidoUser']}'.trim();
-        } else {
-          _userName = user.userMetadata?['full_name'] ?? 'Usuario';
-        }
+      // Intentamos cargar de los metadatos de Google primero por seguridad
+      if (user != null) {
+        _userName = user.userMetadata?['full_name'] ?? 'Usuario de Google';
+        _userEmail = user.email ?? '';
+      } else {
+        _userName = 'Usuario';
+        _userEmail = '';
       }
+
     } catch (e) {
+      print('Error al cargar datos de usuario: $e');
       _userName = 'Error al cargar';
     } finally {
-      _isLoading = false;
-      notifyListeners();
+      // SOLO si el componente sigue vivo, cambiamos el estado y notificamos
+      if (!_isDisposed) {
+        _isLoading = false;
+        notifyListeners();
+      }
     }
   }
 
   Future<void> signOut() async {
     await _supabaseClient.auth.signOut();
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true; // Marcamos como destruido antes de llamar al super
+    super.dispose();
   }
 }

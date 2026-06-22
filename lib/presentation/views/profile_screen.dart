@@ -1,26 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../viewmodels/profile_viewmodel.dart';
 import 'login_view.dart'; 
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late ProfileViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    // Creamos el ViewModel una sola vez al inicializar la pantalla,
+    // evitando que se recree en bucle infinito dentro del build.
+    _viewModel = ProfileViewModel();
+    _viewModel.loadUserData();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    
-    // Gestiona el estado de la pantalla mediante Provider
-    return ChangeNotifierProvider(
-      create: (_) => ProfileViewModel(),
+    return ChangeNotifierProvider<ProfileViewModel>.value(
+      value: _viewModel,
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
         appBar: AppBar(
           backgroundColor: Colors.white,
           elevation: 0,
-          leading: const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'),
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Consumer<ProfileViewModel>(
+              builder: (context, viewModel, child) {
+                final user = Supabase.instance.client.auth.currentUser;
+                final String? avatarUrl = user?.userMetadata?['avatar_url'];
+
+                return CircleAvatar(
+                  backgroundImage: avatarUrl != null 
+                      ? NetworkImage(avatarUrl)
+                      : const NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'),
+                );
+              },
             ),
           ),
           title: Row(
@@ -43,22 +67,35 @@ class ProfileScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
+            final userSession = Supabase.instance.client.auth.currentUser;
+            
+            final String displayName = (viewModel.userName.isEmpty || viewModel.userName.contains('Error'))
+                ? (userSession?.userMetadata?['full_name'] ?? 'Usuario de Google')
+                : viewModel.userName;
+
+            final String displayEmail = (viewModel.userEmail.isEmpty || viewModel.userEmail.contains('Error'))
+                ? (userSession?.email ?? 'Sin correo')
+                : viewModel.userEmail;
+
+            final String? profilePictureUrl = userSession?.userMetadata?['avatar_url'];
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 children: [
-                  // Foto Central del Perfil
                   Center(
                     child: Column(
                       children: [
                         Stack(
                           children: [
-                            const CircleAvatar(
+                            CircleAvatar(
                               radius: 50,
                               backgroundColor: Colors.blue,
                               child: CircleAvatar(
                                 radius: 46,
-                                backgroundImage: NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'),
+                                backgroundImage: profilePictureUrl != null
+                                    ? NetworkImage(profilePictureUrl)
+                                    : const NetworkImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'),
                               ),
                             ),
                             Positioned(
@@ -74,7 +111,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          viewModel.userName,
+                          displayName,
                           style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                         ),
                         const SizedBox(height: 4),
@@ -95,7 +132,7 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow('Correo Electrónico', viewModel.userEmail),
+                        _buildInfoRow('Correo Electrónico', displayEmail),
                         const Divider(height: 24),
                         _buildInfoRow('Número de Teléfono', '+1 (555) 123-4567'),
                       ],
@@ -145,7 +182,6 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  // Cierra la sesión actual y redirige al login
                   TextButton.icon(
                     onPressed: () async {
                       await viewModel.signOut();

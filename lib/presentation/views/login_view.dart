@@ -1,5 +1,7 @@
+import 'dart:async'; // <- IMPORTANTE: Añadido para el control del stream de Supabase
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // <- IMPORTANTE: Añadido para los eventos de Auth
 import '../../domain/repositories/auth_repository.dart'; 
 import '../viewmodels/login_viewmodel.dart';
 import 'main_navigation_screen.dart'; 
@@ -17,9 +19,43 @@ class _LoginViewState extends State<LoginView> {
   final _passwordController = TextEditingController();
   bool _localLoading = false; 
   String _localError = '';    
+  
+  // Variable añadida de forma interna para controlar la escucha asíncrona de Supabase
+  StreamSubscription<AuthState>? _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Escucha global automatizada: Cuando Google responda con éxito, te redirige solo
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final Session? session = data.session;
+      final AuthChangeEvent event = data.event;
+
+      print('=== [Auth Listener] Evento detectado: $event ===');
+
+      if (session != null && 
+          (event == AuthChangeEvent.signedIn || event == AuthChangeEvent.tokenRefreshed)) {
+        
+        print('=== [Auth Listener] Sesión confirmada. Redirigiendo a MainScreen ===');
+        
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+              );
+            }
+          });
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
+    _authSubscription?.cancel(); // Cancelamos la suscripción al cerrar la vista
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -63,8 +99,8 @@ class _LoginViewState extends State<LoginView> {
                     border: Border.all(color:  Colors.grey, width: 1.5),                  
                   ), 
                   height: 80,
-                    width: 80,
-                    child: const Icon(
+                  width: 80,
+                  child: const Icon(
                     Icons.check_circle_outline,
                     color: Colors.white,
                     size: 50,
@@ -188,38 +224,35 @@ class _LoginViewState extends State<LoginView> {
                     ),
                   ),
                   child: ElevatedButton(
-                   // Modificación dentro del onPressed de tu botón en LoginView:
-onPressed: _localLoading
-    ? null
-    : () async {
-        setState(() {
-          _localLoading = true;
-          _localError = '';
-        });
+                    onPressed: _localLoading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _localLoading = true;
+                              _localError = '';
+                            });
 
-        try {
+                            try {
 
-          final userData = await authRepository.signInWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
+                              final userData = await authRepository.signInWithEmailAndPassword(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text,
+                              );
 
-          if (mounted) {
-            // viewModel.setCurrentUser(userData); 
-            
-            print('Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}');
+                              if (mounted) {
+                                print('Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}');
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('¡Bienvenido, ${userData['nombreUser']}!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-  );
-}
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('¡Bienvenido, ${userData['nombreUser']}!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+                                );
+                              }
                             } catch (e) {
                               setState(() {
                                 _localError = e.toString().replaceAll('Exception: ', '');
@@ -273,7 +306,7 @@ Navigator.pushReplacement(
                 ),
                 const SizedBox(height: 24),
 
-                // Botones de Google y Apple
+                // Botones de Google y Apple con la acción inyectada en Google sin alterar parámetros
                 Row(
                   children: [
                     Expanded(
@@ -281,6 +314,25 @@ Navigator.pushReplacement(
                         label: 'Google',
                         iconPath: 'assets/google_logo.png',
                         isGoogle: true,
+                        onTap: () async {
+                          if (_localLoading) return;
+                          setState(() {
+                            _localLoading = true;
+                            _localError = '';
+                          });
+                          try {
+                            print('=== [UI] Presionando botón de Google ===');
+                            await authRepository.signInWithGoogle();
+                          } catch (e) {
+                            setState(() {
+                              _localError = e.toString().replaceAll('Exception: ', '');
+                            });
+                          } finally {
+                            if (mounted) {
+                              setState(() => _localLoading = false);
+                            }
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -289,6 +341,9 @@ Navigator.pushReplacement(
                         label: 'Apple',
                         icon: Icons.apple,
                         isGoogle: false,
+                        onTap: () {
+                          print('Apple Sign-In no implementado');
+                        },
                       ),
                     ),
                   ],
@@ -387,14 +442,16 @@ Navigator.pushReplacement(
     );
   }
 
+  // Agregado el parámetro callback 'onTap' al constructor del constructor de botones
   Widget _buildSocialButton({
     required String label,
     IconData? icon,
     String? iconPath,
     required bool isGoogle,
+    VoidCallback? onTap,
   }) {
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: onTap ?? () {},
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
         side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
