@@ -1,6 +1,7 @@
+import 'dart:async'; // <- IMPORTANTE: Añadido para el control del stream de Supabase
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/auth_repository.dart'; 
 import '../viewmodels/login_viewmodel.dart';
 import 'main_navigation_screen.dart';
 import 'register_screen.dart';
@@ -15,11 +16,12 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _localLoading = false;
-  String _localError = '';
+  bool _localLoading = false; 
+  String _localError = '';    
 
   @override
   void dispose() {
+    _authSubscription?.cancel(); // Cancelamos la suscripción al cerrar la vista
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -195,63 +197,29 @@ class _LoginViewState extends State<LoginView> {
                               _localError = '';
                             });
 
-                            try {
-                              final userData = await authRepository
-                                  .signInWithEmailAndPassword(
-                                    email: _emailController.text.trim(),
-                                    password: _passwordController.text,
-                                  );
+        try {
 
-                              if (mounted) {
-                                viewModel.setCurrentUser(userData);
+          final userData = await authRepository.signInWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
 
-                                print(
-                                  'Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}',
-                                );
+          if (mounted) {
+            // viewModel.setCurrentUser(userData); 
+            
+            print('Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}');
 
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '¡Bienvenido, ${userData['nombreUser']}!',
-                                    ),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-
-                                final int idRol = userData['id_rol'] ?? 1;
-
-                                switch (idRol) {
-                                  case 1:
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const MainNavigationScreen(),
-                                      ),
-                                    );
-                                    break;
-                                  case 2:
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const MainNavigationScreen(),
-                                      ),
-                                    );
-                                    break;
-                                  case 3:
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const MainNavigationScreen(),
-                                      ),
-                                    );
-                                    break;
-                                  default:
-                                    throw Exception('Rol no autorizado');
-                                }
-                              }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('¡Bienvenido, ${userData['nombreUser']}!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+  );
+}
                             } catch (e) {
                               setState(() {
                                 _localError = e.toString().replaceAll(
@@ -311,7 +279,7 @@ class _LoginViewState extends State<LoginView> {
                 ),
                 const SizedBox(height: 24),
 
-                // Botones de Google y Apple
+                // Botones de Google y Apple con la acción inyectada en Google sin alterar parámetros
                 Row(
                   children: [
                     Expanded(
@@ -319,6 +287,25 @@ class _LoginViewState extends State<LoginView> {
                         label: 'Google',
                         iconPath: 'assets/google_logo.png',
                         isGoogle: true,
+                        onTap: () async {
+                          if (_localLoading) return;
+                          setState(() {
+                            _localLoading = true;
+                            _localError = '';
+                          });
+                          try {
+                            print('=== [UI] Presionando botón de Google ===');
+                            await authRepository.signInWithGoogle();
+                          } catch (e) {
+                            setState(() {
+                              _localError = e.toString().replaceAll('Exception: ', '');
+                            });
+                          } finally {
+                            if (mounted) {
+                              setState(() => _localLoading = false);
+                            }
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -327,6 +314,9 @@ class _LoginViewState extends State<LoginView> {
                         label: 'Apple',
                         icon: Icons.apple,
                         isGoogle: false,
+                        onTap: () {
+                          print('Apple Sign-In no implementado');
+                        },
                       ),
                     ),
                   ],
@@ -425,14 +415,16 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  // Agregado el parámetro callback 'onTap' al constructor del constructor de botones
   Widget _buildSocialButton({
     required String label,
     IconData? icon,
     String? iconPath,
     required bool isGoogle,
+    VoidCallback? onTap,
   }) {
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: onTap ?? () {},
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
         side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),

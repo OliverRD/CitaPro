@@ -38,8 +38,12 @@ dependencies:
   supabase_flutter: ^2.14.2
   crypto: ^3.0.7
   crypt: ^4.3.1
+<<<<<<< HEAD
   image_picker: ^0.8.7+4
 
+=======
+  url_launcher: ^6.3.2
+>>>>>>> b57d11898422f73e9bfb75eea34b5e0b68f53f83
 dev_dependencies:
   flutter_test:
     sdk: flutter

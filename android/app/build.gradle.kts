@@ -23,6 +23,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // === CONFIGURACIÓN DE REDIRECCIÓN PARA GOOGLE Y SUPABASE ===
+        manifestPlaceholders += mapOf("authCallbackUrlScheme" to "io.supabase.citapro")
     }
 
     buildTypes {

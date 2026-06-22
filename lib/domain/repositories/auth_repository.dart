@@ -1,3 +1,4 @@
+
 abstract class AuthRepository {
   Future<Map<String, dynamic>> signInWithEmailAndPassword({
     required String email,
@@ -11,4 +12,11 @@ abstract class AuthRepository {
     required String password,
     required String cellphone,
   });
+<<<<<<< HEAD
 }
+=======
+
+  // === AGREGAMOS ESTA LÍNEA PARA EL INICIO DE SESIÓN CON GOOGLE ===
+  Future<void> signInWithGoogle();
+}
+>>>>>>> b57d11898422f73e9bfb75eea34b5e0b68f53f83

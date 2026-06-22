@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/domain/repositories/auth_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'data/repositories/auth_repository_impl.dart';
+import 'domain/repositories/auth_repository.dart';
 import 'domain/usecases/auth/login_usecase.dart';
 import 'presentation/viewmodels/login_viewmodel.dart';
 import 'presentation/views/login_view.dart';
+import 'presentation/views/main_navigation_screen.dart'; // Asegúrate de que esta ruta sea correcta
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,12 +31,9 @@ class MyApp extends StatelessWidget {
         Provider<AuthRepository>(
           create: (_) => AuthRepositoryImpl(supabaseClient),
         ),
-        // Registro del ViewModel de inicio de sesión
         ChangeNotifierProvider(
           create: (context) => LoginViewModel(
-            LoginUseCase(
-              Provider.of<AuthRepository>(context, listen: false),
-            ),
+            LoginUseCase(Provider.of<AuthRepository>(context, listen: false)),
           ),
         ),
       ],
@@ -43,8 +41,29 @@ class MyApp extends StatelessWidget {
         title: 'CitaPro',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(useMaterial3: true),
-        home: const LoginView(), 
+        // Aquí conectamos el AuthWrapper para que valide la sesión automáticamente
+        home: const AuthWrapper(),
       ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Este StreamBuilder escucha los cambios de sesión de Supabase en tiempo real
+    return StreamBuilder<AuthState>(
+      stream: Supabase.instance.client.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        // Si hay una sesión activa, enviamos al usuario directo a la pantalla principal
+        if (snapshot.hasData && snapshot.data?.session != null) {
+          return const MainNavigationScreen();
+        }
+        // Si no hay sesión, mostramos el Login
+        return const LoginView();
+      },
     );
   }
 }

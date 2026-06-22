@@ -29,10 +29,25 @@ class AuthRepositoryMock implements AuthRepository {
     required String cellphone,
   }) async {
     await Future.delayed(const Duration(milliseconds: 1500));
+<<<<<<< HEAD
 
+=======
+>>>>>>> b57d11898422f73e9bfb75eea34b5e0b68f53f83
     if (email.contains('error')) {
       throw Exception('Este correo ya está registrado.');
     }
     return; // Éxito
   }
+<<<<<<< HEAD
 }
+=======
+
+  // === SIMULACIÓN DE GOOGLE AGREGADA PARA CORREGIR EL ERROR DE HERENCIA ===
+  @override
+  Future<void> signInWithGoogle() async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+    print('=== Login con Google (Mock Simulation) Exitoso ===');
+    return;
+  }
+}
+>>>>>>> b57d11898422f73e9bfb75eea34b5e0b68f53f83
