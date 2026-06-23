@@ -8,10 +8,12 @@ class ProfileViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String _userName = 'Cargando...';
   String _userEmail = '';
+  String _userPhone = 'Sin teléfono';
 
   bool get isLoading => _isLoading;
   String get userName => _userName;
   String get userEmail => _userEmail;
+  String get userPhone => _userPhone;
 
   String? _userPhotoUrl;
   String? get userPhotoUrl => _userPhotoUrl;
@@ -29,21 +31,26 @@ class ProfileViewModel extends ChangeNotifier {
       if (user != null) {
         _userEmail = user.email ?? '';
 
-        // Obtiene los datos del usuario desde la tabla de usuarios
         final data = await _supabaseClient
             .from('usuarios')
-            .select('nombreUser')
+            .select('nombreUser, telefonoUser')
             .eq('auth_id', user.id)
             .maybeSingle();
 
         if (data != null) {
           _userName = (data['nombreUser'] ?? '').toString().trim();
+          _userPhone = (data['telefonoUser'] ?? 'Sin teléfono')
+              .toString()
+              .trim();
+          if (_userPhone.isEmpty) _userPhone = 'Sin teléfono';
         } else {
           _userName = user.userMetadata?['full_name'] ?? 'Usuario';
+          _userPhone = 'Sin teléfono';
         }
       }
     } catch (e) {
       _userName = 'Error al cargar';
+      _userPhone = 'Error al cargar';
     } finally {
       _isLoading = false;
       notifyListeners();

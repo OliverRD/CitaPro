@@ -13,7 +13,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
-  final _cedulaController = TextEditingController();
   final _cellphoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -33,7 +32,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _cedulaController.dispose();
     _cellphoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -56,7 +54,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       await _authRepository.signUp(
         name: _nameController.text.trim(),
-        cedula: _cedulaController.text.trim(),
         cellphone: _cellphoneController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -154,16 +151,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 16),
 
                     _buildInputField(
-                      label: 'Cédula',
-                      hint: 'Ej. 1.234.567-8',
-                      icon: Icons.badge_outlined,
-                      controller: _cedulaController,
-                      validator: (value) =>
-                          value!.isEmpty ? 'Ingresa tu cédula' : null,
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildInputField(
                       label: 'Correo Electrónico',
                       hint: 'tu@correo.com',
                       icon: Icons.email_outlined,
@@ -197,6 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         return null;
                       },
                     ),
+                    const SizedBox(height: 16),
 
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

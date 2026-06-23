@@ -235,7 +235,7 @@ class ProfileScreen extends StatelessWidget {
                               const Divider(height: 24),
                               _buildInfoRow(
                                 'Número de Teléfono',
-                                '+1 (555) 123-4567',
+                                viewModel.userPhone,
                               ),
                             ],
                           ),
