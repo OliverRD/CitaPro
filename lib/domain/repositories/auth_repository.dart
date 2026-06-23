@@ -6,6 +6,7 @@ abstract class AuthRepository {
 
   Future<void> signUp({
     required String name,
+    required String cedula,
     required String email,
     required String password,
     required String cellphone,

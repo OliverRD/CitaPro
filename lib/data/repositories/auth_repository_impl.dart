@@ -19,9 +19,8 @@ class AuthRepositoryImpl implements AuthRepository {
           .signInWithPassword(email: email, password: password);
 
       final userUuid = response.user?.id;
-      if (userUuid == null) {
+      if (userUuid == null)
         throw Exception('No se obtuvo el UUID del usuario.');
-      }
 
       final List<Map<String, dynamic>> data = await _supabaseClient
           .from('usuarios')
@@ -45,35 +44,48 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signUp({
     required String name,
+    required String cedula,
     required String email,
     required String password,
     required String cellphone,
   }) async {
     try {
-      print('=== 1. Iniciando registro en Supabase Auth ===');
+      print('=== Iniciando registro: $email ===');
 
       final AuthResponse response = await _supabaseClient.auth.signUp(
         email: email,
         password: password,
-        data: {
-          'nombreUser': name.trim(),
-          'telefonoUser': cellphone,
-          'id_rol': 1,
-          'activo': true,
-        },
+        data: {'full_name': name},
       );
 
       if (response.user != null) {
-        print(
-          '=== 2. ¡ÉXITO! Auth creó el usuario y el Trigger llenó la tabla usuarios ===',
-        );
+        final nameParts = name.trim().split(' ');
+        final firstName = nameParts.isNotEmpty ? nameParts.first : name;
+        final lastName = nameParts.length > 1
+            ? nameParts.sublist(1).join(' ')
+            : '';
+
+        final passwordhash = Crypt.sha256(password).toString();
+
+        await _supabaseClient.from('usuarios').insert({
+          'nombreUser': firstName,
+          'apellidoUser': lastName,
+          'correoUser': email,
+          'password_hash': passwordhash,
+          'auth_id': response.user!.id,
+          'cedula': cedula,
+          'id_rol': 1,
+          'activo': true,
+        });
+
+        print('Usuario registrado con éxito en la base de datos');
       }
     } on AuthException catch (e) {
-      print('Error Auth Registro: { code: ${e.code}, message: ${e.message} }');
+      print('Error Auth Registro: ${e.message}');
       throw Exception(e.message);
     } catch (e) {
-      print('Error General Registro: $e');
-      throw Exception('Error inesperado: $e');
+      print('Error DB Registro: $e');
+      throw Exception('Error en base de datos: $e');
     }
   }
 }

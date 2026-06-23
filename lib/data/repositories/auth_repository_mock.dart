@@ -10,6 +10,7 @@ class AuthRepositoryMock implements AuthRepository {
     if (email == 'test@citapro.com' && password == '123456') {
       return {
         'nombreUser': 'Usuario',
+        'apellidoUser': 'Prueba',
         'correoUser': email,
         'auth_id': 'mock-uuid-123',
         'id_rol': 2,
@@ -22,6 +23,7 @@ class AuthRepositoryMock implements AuthRepository {
   @override
   Future<void> signUp({
     required String name,
+    required String cedula,
     required String email,
     required String password,
     required String cellphone,
