@@ -12,7 +12,7 @@ class LoginView extends StatefulWidget {
   State<LoginView> createState() => _LoginViewState();
 }
 
-  class _LoginViewState extends State<LoginView> {
+class _LoginViewState extends State<LoginView> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _localLoading = false; 
@@ -28,7 +28,6 @@ class LoginView extends StatefulWidget {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginViewModel>();
-    // Repositorio conectado a supa base 
     final authRepository = Provider.of<AuthRepository>(context, listen: false);
 
     return Scaffold(
@@ -55,21 +54,19 @@ class LoginView extends StatefulWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 Container(
                   decoration: BoxDecoration(
                     color: const Color.fromARGB(255, 1, 8, 65),
                     borderRadius: BorderRadius.circular(17), 
-                    border: Border.all(color:  Colors.grey, width: 1.5),                  
+                    border: Border.all(color: Colors.grey, width: 1.5),                  
                   ), 
                   height: 80,
-                    width: 80,
-                    child: const Icon(
+                  width: 80,
+                  child: const Icon(
                     Icons.check_circle_outline,
                     color: Colors.white,
                     size: 50,
                   ),
-
                 ),
                 const SizedBox(height: 15),
 
@@ -128,7 +125,6 @@ class LoginView extends StatefulWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Recordar sesión y contraseña olvidada
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -188,38 +184,34 @@ class LoginView extends StatefulWidget {
                     ),
                   ),
                   child: ElevatedButton(
-                   // Modificación dentro del onPressed de tu botón en LoginView:
-onPressed: _localLoading
-    ? null
-    : () async {
-        setState(() {
-          _localLoading = true;
-          _localError = '';
-        });
+                    onPressed: _localLoading
+                        ? null
+                        : () async {
+                            setState(() {
+                              _localLoading = true;
+                              _localError = '';
+                            });
 
-        try {
+                            try {
+                              final userData = await authRepository.signInWithEmailAndPassword(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text,
+                              );
 
-          final userData = await authRepository.signInWithEmailAndPassword(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
+                              if (mounted) {
+                                print('Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}');
 
-          if (mounted) {
-            // viewModel.setCurrentUser(userData); 
-            
-            print('Sesión iniciada para: ${userData['nombreUser']} con Rol ID: ${userData['id_rol']}');
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('¡Bienvenido, ${userData['nombreUser']}!'),
-                backgroundColor: Colors.green,
-              ),
-            );
-Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-  );
-}
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('¡Bienvenido, ${userData['nombreUser']}!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+                                );
+                              }
                             } catch (e) {
                               setState(() {
                                 _localError = e.toString().replaceAll('Exception: ', '');
@@ -278,6 +270,7 @@ Navigator.pushReplacement(
                   children: [
                     Expanded(
                       child: _buildSocialButton(
+                        context: context, // <-- SE CORRIGIÓ: Pasamos el context actual
                         label: 'Google',
                         iconPath: 'assets/google_logo.png',
                         isGoogle: true,
@@ -286,6 +279,7 @@ Navigator.pushReplacement(
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildSocialButton(
+                        context: context, // <-- SE CORRIGIÓ: Pasamos el context actual
                         label: 'Apple',
                         icon: Icons.apple,
                         isGoogle: false,
@@ -388,13 +382,19 @@ Navigator.pushReplacement(
   }
 
   Widget _buildSocialButton({
+    required BuildContext context, // <-- SE CORRIGIÓ: Parámetro explícito de contexto
     required String label,
     IconData? icon,
     String? iconPath,
     required bool isGoogle,
   }) {
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: isGoogle
+          ? () async {
+              final viewModel = Provider.of<LoginViewModel>(context, listen: false);
+              await viewModel.signInWithGoogle();
+            }
+          : () {},
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
         side: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
