@@ -61,15 +61,12 @@ class AuthRepositoryImpl implements AuthRepository {
       if (response.user != null) {
         final nameParts = name.trim().split(' ');
         final firstName = nameParts.isNotEmpty ? nameParts.first : name;
-        final lastName = nameParts.length > 1
-            ? nameParts.sublist(1).join(' ')
-            : '';
+     
 
         final passwordhash = Crypt.sha256(password).toString();
 
         await _supabaseClient.from('usuarios').insert({
           'nombreUser': firstName,
-          'apellidoUser': lastName,
           'correoUser': email,
           'password_hash': passwordhash,
           'auth_id': response.user!.id,
