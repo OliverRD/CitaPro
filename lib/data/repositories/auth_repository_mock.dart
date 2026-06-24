@@ -35,4 +35,23 @@ class AuthRepositoryMock implements AuthRepository {
     }
     return; // Éxito
   }
+
+  // === MÉTODO SIMULADO PARA GOOGLE (MOCK) ===
+  @override
+  Future<Map<String, dynamic>?> signInWithGoogle() async {
+    print('=== Simulando Auth con Google (Mock activo) ===');
+    
+    // Simula el tiempo que tarda el usuario seleccionando su cuenta de Google
+    await Future.delayed(const Duration(milliseconds: 1500));
+    
+    // Retorna una estructura idéntica a la que espera tu base de datos de Supabase
+    return {
+      'nombreUser': 'Carlos',
+      'apellidoUser': 'Google Mock',
+      'correoUser': 'carlos.google.mock@gmail.com',
+      'auth_id': 'mock-google-uuid-999',
+      'id_rol': 1,
+      'activo': true,
+    };
+  }
 }

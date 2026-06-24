@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'bookings_view.dart'; 
 import 'profile_screen.dart'; 
 import 'home_view.dart'; 
-
+import 'history_view.dart';
+import '../viewmodels/profile_viewmodel.dart';
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -21,6 +23,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     _screens = [
       const HomeView(), 
       const BookingsView(),
+      const HistoryView(),
+      ChangeNotifierProvider(
+        create: (_) => ProfileViewModel(),
+        child: const ProfileScreen(),
+      ),
       const Center(child: Text('Pantalla de Historial', style: TextStyle(color: Color(0xFF64748B)))),
       const ProfileScreen(), 
     ];
@@ -68,7 +75,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     )
                   : const Icon(Icons.calendar_month_outlined),
             ),
-            label: 'Trabajos',
+            label: 'Reservas',
           ),
           const BottomNavigationBarItem(
             icon: Padding(

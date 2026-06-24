@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Importante para escuchar el estado global
+import '../viewmodels/booking_viewmodel.dart'; // Asegúrate de ajustar esta ruta según tus carpetas
+import 'bookings_view.dart'; // 🔥 IMPORTANTE: Importamos la vista de reservas para poder navegar a ella
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -340,15 +343,42 @@ class _HomeViewState extends State<HomeView> {
                                           ),
                                         ],
                                       ),
+                                      // 🔥 BOTÓN TOTALMENTE CORREGIDO CON TRANSICIÓN DE PANTALLA
                                       ElevatedButton(
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          final nombreNegocio = service['businessName']!;
+                                          
+                                          // 1. Guardamos la selección en el BookingViewModel global
+                                          Provider.of<BookingViewModel>(context, listen: false)
+                                              .seleccionarBarberia(nombreNegocio);
+
+                                          // 2. Feedback visual rápido para el usuario
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Seleccionaste: $nombreNegocio. Redirigiendo...'),
+                                              backgroundColor: const Color(0xFF0061FF),
+                                              duration: const Duration(seconds: 1),
+                                            ),
+                                          );
+
+                                          // 3. Transición de pantalla directa hacia BookingsView
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const BookingsView(),
+                                            ),
+                                          );
+                                        },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: const Color(0xFF0061FF),
                                           elevation: 0,
                                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                         ),
-                                        child: const Text('Reservar Ya', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)), // Traducido
+                                        child: const Text(
+                                          'Reservar Ya', 
+                                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                                        ), 
                                       ),
                                     ],
                                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../viewmodels/login_viewmodel.dart'; // Importamos el viewmodel para Google
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -41,6 +42,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _handleRegister() async {
+    // BLOQUEO ANTI DOBLE CLIC: Si ya está enviando datos, salimos de inmediato
+    if (_isLoading) return;
+
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -66,13 +70,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('¡Cuenta creada con éxito!')),
         );
-        // Redireccion del login o al home
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
+        final errorString = e.toString();
+        String mensajeTraducido = errorString.replaceAll('Exception: ', '');
+
+        // CONTROL DE ERRORES: Traducimos los errores para que se muestren limpios en el SnackBar
+        if (errorString.contains('User already registered')) {
+          mensajeTraducido = 'Este correo ya se encuentra registrado. Intenta iniciar sesión.';
+        } else if (errorString.contains('Email not confirmed')) {
+          mensajeTraducido = 'Cuenta registrada. Por favor confirma tu correo electrónico antes de ingresar.';
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+          SnackBar(content: Text(mensajeTraducido)),
         );
       }
     } finally {
@@ -82,6 +95,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loginViewModel = context.watch<LoginViewModel>();
+    final bool estaCargandoTodo = _isLoading || loginViewModel.isLoading;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       body: SafeArea(
@@ -148,6 +164,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'Ej. Juan Ramos',
                       icon: Icons.person_outline,
                       controller: _nameController,
+                      enabled: !estaCargandoTodo,
                       validator: (value) =>
                           value!.isEmpty ? 'Ingresa tu nombre completo' : null,
                     ),
@@ -158,6 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'Ej. 1.234.567-8',
                       icon: Icons.badge_outlined,
                       controller: _cedulaController,
+                      enabled: !estaCargandoTodo,
                       validator: (value) =>
                           value!.isEmpty ? 'Ingresa tu cédula' : null,
                     ),
@@ -168,10 +186,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'tu@correo.com',
                       icon: Icons.email_outlined,
                       controller: _emailController,
+                      enabled: !estaCargandoTodo,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Ingresa tu correo';
+                        }
                         if (!RegExp(
                           r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                         ).hasMatch(value)) {
@@ -187,10 +207,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       hint: 'Ej. +18291234567',
                       icon: Icons.phone_outlined,
                       controller: _cellphoneController,
+                      enabled: !estaCargandoTodo,
                       keyboardType: TextInputType.phone,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Ingresa tu número de celular';
+                        }
                         if (!RegExp(r'^\+?\d{7,15}$').hasMatch(value)) {
                           return 'Número no válido';
                         }
@@ -213,6 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         TextFormField(
                           controller: _passwordController,
                           obscureText: _isPasswordObscured,
+                          enabled: !estaCargandoTodo,
                           validator: (value) =>
                               value!.length < 6 ? 'Mínimo 6 caracteres' : null,
                           decoration: InputDecoration(
@@ -229,13 +252,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     : Icons.visibility_outlined,
                                 color: Colors.grey,
                               ),
-                              onPressed: () => setState(
-                                () =>
-                                    _isPasswordObscured = !_isPasswordObscured,
+                              onPressed: estaCargandoTodo ? null : () => setState(
+                                () => _isPasswordObscured = !_isPasswordObscured,
                               ),
                             ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: estaCargandoTodo ? Colors.grey.shade100 : Colors.white,
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: 14,
                             ),
@@ -265,8 +287,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
-                          onChanged: (value) =>
-                              setState(() => _acceptTerms = value ?? false),
+                          onChanged: estaCargandoTodo
+                              ? null
+                              : (value) => setState(() => _acceptTerms = value ?? false),
                         ),
                         Expanded(
                           child: RichText(
@@ -306,15 +329,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       width: double.infinity,
                       height: 48,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleRegister,
+                        onPressed: estaCargandoTodo ? null : _handleRegister,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF5113D9),
+                          backgroundColor: estaCargandoTodo ? Colors.grey.shade400 : const Color(0xFF5113D9),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
                           elevation: 0,
                         ),
-                        child: _isLoading
+                        child: estaCargandoTodo
                             ? const SizedBox(
                                 width: 24,
                                 height: 24,
@@ -357,6 +380,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             label: 'Google',
                             icon: Icons.g_mobiledata,
                             color: Colors.red,
+                            onTap: estaCargandoTodo
+                                ? null
+                                : () async {
+                                    FocusScope.of(context).unfocus();
+                                    final exito = await context.read<LoginViewModel>().loginWithGoogle();
+                                    if (exito && mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  },
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -365,6 +397,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             label: 'Apple',
                             icon: Icons.apple,
                             color: Colors.black,
+                            onTap: estaCargandoTodo ? null : () {},
                           ),
                         ),
                       ],
@@ -382,12 +415,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: const Text(
+                          onTap: estaCargandoTodo ? null : () => Navigator.pop(context),
+                          child: Text(
                             'Inicia sesión',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF0061FF),
+                              color: estaCargandoTodo ? Colors.grey : const Color(0xFF0061FF),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -410,6 +443,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     required IconData icon,
     required TextEditingController controller,
     required String? Function(String?)? validator,
+    bool enabled = true,
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Column(
@@ -428,12 +462,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
           controller: controller,
           validator: validator,
           keyboardType: keyboardType,
+          enabled: enabled,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: const TextStyle(color: Colors.black26),
             prefixIcon: Icon(icon, color: Colors.grey),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: enabled ? Colors.white : Colors.grey.shade100,
             contentPadding: const EdgeInsets.symmetric(vertical: 14),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -449,18 +484,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  // 🔥 DECOUPLED SOCIAL BUTTON METHOD (Acepta el parámetro onTap correctamente)
   Widget _buildSocialButton({
     required String label,
     required IconData icon,
     required Color color,
+    VoidCallback? onTap, 
   }) {
     return OutlinedButton.icon(
-      onPressed: () {},
-      icon: Icon(icon, color: color, size: 24),
+      onPressed: onTap, 
+      icon: Icon(icon, color: onTap == null ? Colors.grey : color, size: 24),
       label: Text(
         label,
-        style: const TextStyle(
-          color: Colors.black87,
+        style: TextStyle(
+          color: onTap == null ? Colors.grey : Colors.black87,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -468,6 +505,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         side: BorderSide(color: Colors.grey.shade300),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: onTap == null ? Colors.grey.shade50 : Colors.white,
       ),
     );
   }

@@ -11,4 +11,7 @@ abstract class AuthRepository {
     required String password,
     required String cellphone,
   });
+
+  // ESTA LÍNEA DEBE EXISTIR Y EL ARCHIVO DEBE ESTAR GUARDADO
+  Future<Map<String, dynamic>?> signInWithGoogle();
 }
