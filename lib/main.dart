@@ -7,9 +7,9 @@ import 'data/repositories/auth_repository_impl.dart';
 import 'domain/usecases/auth/login_usecase.dart';
 import 'domain/usecases/auth/login_with_google_usecase.dart';
 import 'presentation/viewmodels/login_viewmodel.dart';
-import 'presentation/viewmodels/booking_viewmodel.dart'; // Tu nuevo ViewModel para las reservas
+import 'presentation/viewmodels/booking_viewmodel.dart'; 
 import 'presentation/views/login_view.dart';
-import 'presentation/views/main_navigation_screen.dart'; // Tu pantalla principal tras iniciar sesión
+import 'presentation/views/main_navigation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +31,6 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        // Proveedor del Repositorio de Autenticación
         Provider<AuthRepository>(
           create: (_) => AuthRepositoryImpl(supabaseClient),
         ),
@@ -47,7 +46,6 @@ class MyApp extends StatelessWidget {
           },
         ),
         
-        // PROVEEDOR AÑADIDO: Gestiona las reservas de Barbería El Maestro y Zen Spa Wellness
         ChangeNotifierProvider(
           create: (_) => BookingViewModel(),
         ),
@@ -60,15 +58,13 @@ class MyApp extends StatelessWidget {
           colorSchemeSeed: Colors.blue,
         ),
         
-        // El StreamBuilder gestiona de forma inteligente si el usuario ya está logueado
         home: StreamBuilder<AuthState>(
           stream: supabaseClient.auth.onAuthStateChange,
           builder: (context, snapshot) {
-            // Si la sesión existe y es válida, saltamos directo al menú principal
+
             if (snapshot.hasData && snapshot.data?.session != null) {
               return const MainNavigationScreen(); 
             }
-            // Si no está logueado, lo mandamos a la pantalla de login
             return const LoginView();
           },
         ),

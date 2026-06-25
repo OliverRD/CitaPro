@@ -53,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginViewModel>();
-    // 🔥 UNIFICACIÓN DE CARGA: Si cualquiera de los dos estados está cargando, bloqueamos la UI
+
     final bool estaCargando = _localLoading || viewModel.isLoading;
 
     return Scaffold(
@@ -138,7 +138,7 @@ class _LoginViewState extends State<LoginView> {
                     controller: _emailController,
                     hintText: 'juan@Gmail.com',
                     icon: Icons.mail_outline,
-                    enabled: !estaCargando, // Desactiva el input si está cargando
+                    enabled: !estaCargando, 
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Por favor ingresa tu correo electrónico';
@@ -155,7 +155,7 @@ class _LoginViewState extends State<LoginView> {
                     hintText: '••••••••',
                     icon: Icons.lock_outline,
                     isPassword: true,
-                    enabled: !estaCargando, // Desactiva el input si está cargando
+                    enabled: !estaCargando, 
                     obscureText: viewModel.obscurePassword,
                     onSuffixTap: viewModel.togglePasswordVisibility,
                     validator: (value) {
@@ -204,7 +204,6 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Mostrar mensajes de error limpios y traducidos
                   if (_localError.isNotEmpty || viewModel.errorMessage.isNotEmpty) ...[
                     Text(
                       _localError.isNotEmpty ? _localError : viewModel.errorMessage,
@@ -218,7 +217,6 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 16),
                   ],
 
-                  // BOTÓN DE INICIAR SESIÓN TRADICIONAL CORREGIDO
                   Container(
                     width: double.infinity,
                     height: 52,
@@ -307,7 +305,6 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 24),
 
-                  // BOTÓN DE GOOGLE CORREGIDO (Inmune a spam de clics)
                   Row(
                     children: [
                       Expanded(
@@ -336,7 +333,6 @@ class _LoginViewState extends State<LoginView> {
                                     if (mounted) {
                                       setState(() {
                                         _localLoading = false;
-                                        // Dejamos que lea la traducción del ViewModel sin sobreescribirla
                                         _localError = ''; 
                                       });
                                     }

@@ -1,9 +1,9 @@
 class Booking {
   final String businessName;
   final String serviceName;
-  final String date;
-  final String time;
-  final String status;
+   String date;
+   String time;
+   String status;
   final String imageUrl; 
 
   Booking({

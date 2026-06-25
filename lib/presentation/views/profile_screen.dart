@@ -8,7 +8,6 @@ import 'login_view.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  // Función interna para desplegar el menú inferior de opciones de foto
   Future<void> _mostrarOpcionesFoto(
     BuildContext context,
     ProfileViewModel viewModel,
@@ -18,11 +17,11 @@ class ProfileScreen extends StatelessWidget {
     Future<void> procesarSeleccion(ImageSource source) async {
       final XFile? image = await picker.pickImage(
         source: source,
-        imageQuality: 70, // Optimiza el tamaño para el Storage de Supabase
+        imageQuality: 70, 
       );
 
       if (image != null) {
-        if (context.mounted) Navigator.pop(context); // Cierra el menú inferior
+        if (context.mounted) Navigator.pop(context); 
         File archivoImagen = File(image.path);
 
         await viewModel.subirFotoUsuario(archivoImagen);
@@ -83,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Gestiona el estado de la pantalla mediante Provider
+
     return ChangeNotifierProvider(
       create: (_) => ProfileViewModel(),
       child: Consumer<ProfileViewModel>(
@@ -143,7 +142,7 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
-                        // Foto Central del Perfil
+
                         Center(
                           child: Column(
                             children: [
@@ -312,7 +311,6 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 32),
 
-                        // Cierra la sesión actual y redirige al login
                         TextButton.icon(
                           onPressed: () async {
                             await viewModel.signOut();

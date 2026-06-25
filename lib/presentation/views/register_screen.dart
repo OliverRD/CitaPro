@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../viewmodels/login_viewmodel.dart'; // Importamos el viewmodel para Google
+import '../viewmodels/login_viewmodel.dart'; 
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,7 +42,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _handleRegister() async {
-    // BLOQUEO ANTI DOBLE CLIC: Si ya está enviando datos, salimos de inmediato
     if (_isLoading) return;
 
     if (!_formKey.currentState!.validate()) return;
@@ -77,7 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         final errorString = e.toString();
         String mensajeTraducido = errorString.replaceAll('Exception: ', '');
 
-        // CONTROL DE ERRORES: Traducimos los errores para que se muestren limpios en el SnackBar
         if (errorString.contains('User already registered')) {
           mensajeTraducido = 'Este correo ya se encuentra registrado. Intenta iniciar sesión.';
         } else if (errorString.contains('Email not confirmed')) {
@@ -484,7 +482,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // 🔥 DECOUPLED SOCIAL BUTTON METHOD (Acepta el parámetro onTap correctamente)
   Widget _buildSocialButton({
     required String label,
     required IconData icon,
