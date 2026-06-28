@@ -8,10 +8,12 @@ class ProfileViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String _userName = 'Cargando...';
   String _userEmail = '';
+  String _userPhone = '';
 
   bool get isLoading => _isLoading;
   String get userName => _userName;
   String get userEmail => _userEmail;
+  String get userPhone => _userPhone;
 
   String? _userPhotoUrl;
   String? get userPhotoUrl => _userPhotoUrl;
