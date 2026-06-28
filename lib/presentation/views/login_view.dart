@@ -26,6 +26,7 @@ class _LoginViewState extends State<LoginView> {
     super.dispose();
   }
 
+  // FUNCIÓN DE NAVEGACIÓN CORREGIDA: Separa el Rol 2 para el Admin
   void _navigateBasedOnRol(int idRol) {
     if (!mounted) return;
 
@@ -35,11 +36,18 @@ class _LoginViewState extends State<LoginView> {
 
     switch (idRol) {
       case 1:
-      case 2:
       case 3:
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+        );
+        break;
+      case 2:
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AdminNavigationScreen(),
+          ),
         );
         break;
       default:
@@ -53,8 +61,6 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginViewModel>();
-    // UNIFICACIÓN DE CARGA: Si cualquiera de los dos estados está cargando, bloqueamos la UI
-
     final bool estaCargando = _localLoading || viewModel.isLoading;
 
     return Scaffold(
@@ -139,8 +145,7 @@ class _LoginViewState extends State<LoginView> {
                     controller: _emailController,
                     hintText: 'juan@Gmail.com',
                     icon: Icons.mail_outline,
-                    enabled:
-                        !estaCargando, // Desactiva el input si está cargando
+                    enabled: !estaCargando,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Por favor ingresa tu correo electrónico';
@@ -157,8 +162,7 @@ class _LoginViewState extends State<LoginView> {
                     hintText: '••••••••',
                     icon: Icons.lock_outline,
                     isPassword: true,
-                    enabled:
-                        !estaCargando, // Desactiva el input si está cargando
+                    enabled: !estaCargando,
                     obscureText: viewModel.obscurePassword,
                     onSuffixTap: viewModel.togglePasswordVisibility,
                     validator: (value) {
@@ -209,7 +213,6 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Mostrar mensajes de error limpios y traducidos
                   if (_localError.isNotEmpty ||
                       viewModel.errorMessage.isNotEmpty) ...[
                     Text(
@@ -226,6 +229,7 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 16),
                   ],
 
+                  // BOTÓN DE INICIAR SESIÓN TRADICIONAL
                   Container(
                     width: double.infinity,
                     height: 52,
@@ -243,6 +247,7 @@ class _LoginViewState extends State<LoginView> {
                           ? null
                           : () async {
                               if (_formKey.currentState!.validate()) {
+                                FocusScope.of(context).unfocus();
                                 setState(() {
                                   _localLoading = true;
                                   _localError = '';
@@ -266,38 +271,9 @@ class _LoginViewState extends State<LoginView> {
                                     );
 
                                     final int idRol = userData['id_rol'] ?? 1;
-
-                                    switch (idRol) {
-                                      case 1:
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const MainNavigationScreen(),
-                                          ),
-                                        );
-                                        break;
-                                      case 2:
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const AdminNavigationScreen(),
-                                          ),
-                                        );
-                                        break;
-                                      case 3:
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const MainNavigationScreen(),
-                                          ),
-                                        );
-                                        break;
-                                      default:
-                                        throw Exception('Rol no autorizado');
-                                    }
+                                    _navigateBasedOnRol(
+                                      idRol,
+                                    ); // Llama a la función centralizada
                                   } else {
                                     if (mounted) {
                                       setState(() {
@@ -360,6 +336,7 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 24),
 
+                  // BOTÓN DE GOOGLE
                   Row(
                     children: [
                       Expanded(
@@ -370,9 +347,7 @@ class _LoginViewState extends State<LoginView> {
                           onTap: estaCargando
                               ? null
                               : () async {
-                                  print('=== BOTÓN GOOGLE CLICKEADO ===');
                                   FocusScope.of(context).unfocus();
-
                                   setState(() {
                                     _localLoading = true;
                                     _localError = '';
@@ -391,9 +366,6 @@ class _LoginViewState extends State<LoginView> {
                                     if (mounted) {
                                       setState(() {
                                         _localLoading = false;
-                                        // Dejamos que lea la traducción del ViewModel sin sobreescribirla
-                                        _localError = '';
-                                        _localError = '';
                                       });
                                     }
                                   }

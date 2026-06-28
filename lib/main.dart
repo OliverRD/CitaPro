@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,9 +6,11 @@ import 'data/repositories/auth_repository_impl.dart';
 import 'domain/usecases/auth/login_usecase.dart';
 import 'domain/usecases/auth/login_with_google_usecase.dart';
 import 'presentation/viewmodels/login_viewmodel.dart';
-import 'presentation/viewmodels/booking_viewmodel.dart'; // Tu nuevo ViewModel para las reservas
+import 'presentation/viewmodels/booking_viewmodel.dart';
+import 'presentation/viewmodels/profile_viewmodel.dart'; // Importación añadida
 import 'presentation/views/login_view.dart';
-import 'presentation/views/main_navigation_screen.dart'; // Tu pantalla principal tras iniciar sesión
+import 'presentation/views/main_navigation_screen.dart';
+import 'presentation/views/admin_navigationscreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +38,7 @@ class MyApp extends StatelessWidget {
           create: (_) => AuthRepositoryImpl(supabaseClient),
         ),
 
-        // Proveedor del LoginViewModel (Inyección de dependencias)
+        // Proveedor del LoginViewModel
         ChangeNotifierProvider(
           create: (context) {
             final repository = Provider.of<AuthRepository>(
@@ -51,27 +52,73 @@ class MyApp extends StatelessWidget {
           },
         ),
 
-        // PROVEEDOR AÑADIDO: Gestiona las reservas de Barbería El Maestro y Zen Spa Wellness
+        // 🔥 PROVEEDOR GLOBAL ASIGNADO: Mantiene los datos del perfil vivos
+        ChangeNotifierProvider(create: (context) => ProfileViewModel()),
+
+        // Gestiona las reservas de Barbería El Maestro y Zen Spa Wellness
         ChangeNotifierProvider(create: (context) => BookingViewModel()),
       ],
       child: MaterialApp(
         title: 'CitaPro',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
-
-        // El StreamBuilder gestiona de forma inteligente si el usuario ya está logueado
-        home: StreamBuilder<AuthState>(
-          stream: supabaseClient.auth.onAuthStateChange,
-          builder: (context, snapshot) {
-            // Si la sesión existe y es válida, saltamos directo al menú principal
-            if (snapshot.hasData && snapshot.data?.session != null) {
-              return const MainNavigationScreen();
-            }
-            // Si no está logueado, lo mandamos a la pantalla de login
-            return const LoginView();
-          },
-        ),
+        home: const AuthSessionValidator(),
       ),
+    );
+  }
+}
+
+/// Widget Intermedio para validar la sesión persistente y redirigir según el Rol real
+class AuthSessionValidator extends StatelessWidget {
+  const AuthSessionValidator({super.key});
+
+  Future<Widget> _determineInitialScreen(SupabaseClient client) async {
+    final session = client.auth.currentSession;
+
+    if (session == null) {
+      return const LoginView();
+    }
+
+    try {
+      final data = await client
+          .from('usuarios')
+          .select('id_rol')
+          .eq('auth_id', session.user.id)
+          .maybeSingle();
+
+      if (data != null) {
+        final int idRol = data['id_rol'] ?? 1;
+        if (idRol == 2) {
+          return const AdminNavigationScreen();
+        }
+      }
+      return const MainNavigationScreen();
+    } catch (e) {
+      return const LoginView();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final supabaseClient = Supabase.instance.client;
+
+    return FutureBuilder<Widget>(
+      future: _determineInitialScreen(supabaseClient),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            backgroundColor: Color(0xFFF8FAFC),
+            body: Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF4F46E5),
+                strokeWidth: 3,
+              ),
+            ),
+          );
+        }
+
+        return snapshot.data ?? const LoginView();
+      },
     );
   }
 }
