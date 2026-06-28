@@ -1,4 +1,3 @@
-// lib/presentation/views/reason_cancel_view.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/booking_viewmodel.dart';
@@ -137,18 +136,14 @@ class _ReasonCancelViewState extends State<ReasonCancelView> {
               padding: const EdgeInsets.all(24.0),
               child: ElevatedButton(
                 onPressed: () {
-                  // 1. Limpiamos la cita cancelada en el BookingViewModel global
+
                   final bookingViewModel = Provider.of<BookingViewModel>(context, listen: false);
                   if (bookingViewModel.barberiaSeleccionada == widget.businessName) {
                     bookingViewModel.seleccionarBarberia(''); // Remueve la tarjeta dinámica
                   }
-
-                  // 2. 🔥 REGRESAR AL MENÚ INICIO (MainNavigationScreen / Base de la app)
-                  // Esto destruye la vista de motivos y la vista duplicada de reservas,
-                  // dejándote exactamente en la pantalla principal limpia.
                   Navigator.popUntil(context, (route) => route.isFirst);
 
-                  // 3. Mostramos el mensaje de éxito flotante
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Cita en "${widget.businessName}" cancelada con éxito.'),

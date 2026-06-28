@@ -54,6 +54,7 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginViewModel>();
     // UNIFICACIÓN DE CARGA: Si cualquiera de los dos estados está cargando, bloqueamos la UI
+
     final bool estaCargando = _localLoading || viewModel.isLoading;
 
     return Scaffold(
@@ -225,7 +226,6 @@ class _LoginViewState extends State<LoginView> {
                     const SizedBox(height: 16),
                   ],
 
-                  // BOTÓN DE INICIAR SESIÓN TRADICIONAL CORREGIDO
                   Container(
                     width: double.infinity,
                     height: 52,
@@ -360,7 +360,6 @@ class _LoginViewState extends State<LoginView> {
                   ),
                   const SizedBox(height: 24),
 
-                  // BOTÓN DE GOOGLE CORREGIDO (Inmune a spam de clics)
                   Row(
                     children: [
                       Expanded(
@@ -393,6 +392,7 @@ class _LoginViewState extends State<LoginView> {
                                       setState(() {
                                         _localLoading = false;
                                         // Dejamos que lea la traducción del ViewModel sin sobreescribirla
+                                        _localError = '';
                                         _localError = '';
                                       });
                                     }

@@ -39,9 +39,8 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 🔐 CONTROL TOTAL: Este método ahora frena el doble clic y traduce los errores tanto de Login como de Registro
   Future<bool> login(String email, String password) async {
-    // Si ya le diste clic y está cargando, bloquea por completo el segundo intento
+
     if (_isLoading) return false;
 
     _isLoading = true;
@@ -58,7 +57,6 @@ class LoginViewModel extends ChangeNotifier {
       
       final errorString = e.toString();
       
-      // Captura y traduce los errores comunes de Supabase para que no rompan la app
       if (errorString.contains('Email not confirmed')) {
         _errorMessage = 'Por favor, revisa tu correo electrónico y confirma tu cuenta antes de iniciar sesión.';
       } else if (errorString.contains('User already registered')) {
@@ -72,7 +70,6 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  // 🌐 INICIO DE SESIÓN CON GOOGLE (Protegido también contra doble clic)
   Future<bool> loginWithGoogle() async {
     if (_isLoading) return false;
 

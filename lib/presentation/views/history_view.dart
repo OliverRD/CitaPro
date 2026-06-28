@@ -1,4 +1,3 @@
-// lib/presentation/views/history_view.dart
 
 import 'package:flutter/material.dart';
 
@@ -7,9 +6,8 @@ class HistoryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Colores basados en el diseño de CitaPro
-    const Color primaryColor = Color(0xFF0D47A1); // Azul principal
-    const Color backgroundColor = Color(0xFFF5F7FA); // Fondo gris muy claro/azulado
+    const Color primaryColor = Color(0xFF0D47A1); 
+    const Color backgroundColor = Color(0xFFF5F7FA); 
     const Color cardColor = Colors.white;
 
     return Scaffold(
@@ -47,7 +45,6 @@ class HistoryView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título de la pantalla
             const Text(
               'Historial de Servicios',
               style: TextStyle(
@@ -110,7 +107,6 @@ class HistoryView extends StatelessWidget {
             ),
             const SizedBox(height: 25),
 
-            // Tarjetas de Estadísticas (Gastado, Completados, Calificación)
             _buildStatCard(
               icon: Icons.account_balance_wallet_rounded,
               iconColor: Colors.blue,
@@ -136,7 +132,6 @@ class HistoryView extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // Sección de Citas Recientes
             const Text(
               'Citas Recientes',
               style: TextStyle(
@@ -147,7 +142,6 @@ class HistoryView extends StatelessWidget {
             ),
             const SizedBox(height: 15),
 
-            // Listado de Historial
             _buildAppointmentCard(
               imageUrl: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=150',
               serviceName: 'Corte de Cabello Premium',
@@ -206,7 +200,6 @@ class HistoryView extends StatelessWidget {
     );
   }
 
-  // Widget Constructor para Tarjetas de Estadísticas
   Widget _buildStatCard({
     required IconData icon,
     required Color iconColor,
@@ -267,7 +260,6 @@ class HistoryView extends StatelessWidget {
     );
   }
 
-  // Widget Constructor para Citas del Historial
   Widget _buildAppointmentCard({
     required String imageUrl,
     required String serviceName,
@@ -296,7 +288,7 @@ class HistoryView extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Imagen del servicio
+
               ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
@@ -313,7 +305,7 @@ class HistoryView extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 14),
-              // Detalles del negocio
+              
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +403,7 @@ class HistoryView extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1D4ED8), // Azul del precio
+                      color: Color(0xFF1D4ED8),
                     ),
                   ),
                 ],

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'domain/repositories/auth_repository.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'data/repositories/auth_repository_impl.dart';
 import 'domain/usecases/auth/login_usecase.dart';
 import 'domain/usecases/auth/login_with_google_usecase.dart';
@@ -53,7 +52,7 @@ class MyApp extends StatelessWidget {
         ),
 
         // PROVEEDOR AÑADIDO: Gestiona las reservas de Barbería El Maestro y Zen Spa Wellness
-        ChangeNotifierProvider(create: (_) => BookingViewModel()),
+        ChangeNotifierProvider(create: (context) => BookingViewModel()),
       ],
       child: MaterialApp(
         title: 'CitaPro',

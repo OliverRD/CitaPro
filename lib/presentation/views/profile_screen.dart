@@ -23,6 +23,7 @@ class ProfileScreen extends StatelessWidget {
       );
       if (image != null) {
         if (context.mounted) Navigator.pop(context);
+        if (context.mounted) Navigator.pop(context);
         File archivoImagen = File(image.path);
         await viewModel.subirFotoUsuario(archivoImagen);
       }
