@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/login_viewmodel.dart';
 import 'main_navigation_screen.dart';
 import 'register_screen.dart';
+import 'admin_navigationscreen.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -12,7 +13,7 @@ class LoginView extends StatefulWidget {
 }
 
 class _LoginViewState extends State<LoginView> {
-  final _formKey = GlobalKey<FormState>(); 
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _localLoading = false;
@@ -27,7 +28,7 @@ class _LoginViewState extends State<LoginView> {
 
   void _navigateBasedOnRol(int idRol) {
     if (!mounted) return;
-    
+
     setState(() {
       _localLoading = false;
     });
@@ -38,14 +39,13 @@ class _LoginViewState extends State<LoginView> {
       case 3:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-            builder: (context) => const MainNavigationScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
         );
         break;
       default:
         setState(() {
-          _localError = 'Rol no autorizado o no asignado en la base de datos (Rol: $idRol)';
+          _localError =
+              'Rol no autorizado o no asignado en la base de datos (Rol: $idRol)';
         });
     }
   }
@@ -53,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<LoginViewModel>();
-    // 🔥 UNIFICACIÓN DE CARGA: Si cualquiera de los dos estados está cargando, bloqueamos la UI
+    // UNIFICACIÓN DE CARGA: Si cualquiera de los dos estados está cargando, bloqueamos la UI
     final bool estaCargando = _localLoading || viewModel.isLoading;
 
     return Scaffold(
@@ -78,7 +78,7 @@ class _LoginViewState extends State<LoginView> {
               ],
             ),
             child: Form(
-              key: _formKey, 
+              key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -138,7 +138,8 @@ class _LoginViewState extends State<LoginView> {
                     controller: _emailController,
                     hintText: 'juan@Gmail.com',
                     icon: Icons.mail_outline,
-                    enabled: !estaCargando, // Desactiva el input si está cargando
+                    enabled:
+                        !estaCargando, // Desactiva el input si está cargando
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Por favor ingresa tu correo electrónico';
@@ -155,7 +156,8 @@ class _LoginViewState extends State<LoginView> {
                     hintText: '••••••••',
                     icon: Icons.lock_outline,
                     isPassword: true,
-                    enabled: !estaCargando, // Desactiva el input si está cargando
+                    enabled:
+                        !estaCargando, // Desactiva el input si está cargando
                     obscureText: viewModel.obscurePassword,
                     onSuffixTap: viewModel.togglePasswordVisibility,
                     validator: (value) {
@@ -174,7 +176,9 @@ class _LoginViewState extends State<LoginView> {
                         children: [
                           Checkbox(
                             value: viewModel.rememberMe,
-                            onChanged: estaCargando ? null : viewModel.toggleRememberMe,
+                            onChanged: estaCargando
+                                ? null
+                                : viewModel.toggleRememberMe,
                             activeColor: const Color(0xFF4F46E5),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4),
@@ -205,9 +209,12 @@ class _LoginViewState extends State<LoginView> {
                   const SizedBox(height: 24),
 
                   // Mostrar mensajes de error limpios y traducidos
-                  if (_localError.isNotEmpty || viewModel.errorMessage.isNotEmpty) ...[
+                  if (_localError.isNotEmpty ||
+                      viewModel.errorMessage.isNotEmpty) ...[
                     Text(
-                      _localError.isNotEmpty ? _localError : viewModel.errorMessage,
+                      _localError.isNotEmpty
+                          ? _localError
+                          : viewModel.errorMessage,
                       style: const TextStyle(
                         color: Colors.red,
                         fontSize: 13,
@@ -249,8 +256,54 @@ class _LoginViewState extends State<LoginView> {
                                 if (exito && mounted) {
                                   final userData = viewModel.currentUser;
                                   if (userData != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          '¡Bienvenido, ${userData['nombreUser']}!',
+                                        ),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+
                                     final int idRol = userData['id_rol'] ?? 1;
-                                    _navigateBasedOnRol(idRol);
+
+                                    switch (idRol) {
+                                      case 1:
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const MainNavigationScreen(),
+                                          ),
+                                        );
+                                        break;
+                                      case 2:
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const AdminNavigationScreen(),
+                                          ),
+                                        );
+                                        break;
+                                      case 3:
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const MainNavigationScreen(),
+                                          ),
+                                        );
+                                        break;
+                                      default:
+                                        throw Exception('Rol no autorizado');
+                                    }
+                                  } else {
+                                    if (mounted) {
+                                      setState(() {
+                                        _localLoading = false;
+                                      });
+                                    }
                                   }
                                 } else {
                                   if (mounted) {
@@ -319,25 +372,28 @@ class _LoginViewState extends State<LoginView> {
                               ? null
                               : () async {
                                   print('=== BOTÓN GOOGLE CLICKEADO ===');
-                                  FocusScope.of(context).unfocus(); 
-                                  
+                                  FocusScope.of(context).unfocus();
+
                                   setState(() {
                                     _localLoading = true;
                                     _localError = '';
                                   });
-                                  
-                                  final exito = await viewModel.loginWithGoogle();
-                                  
+
+                                  final exito = await viewModel
+                                      .loginWithGoogle();
+
                                   if (exito && mounted) {
                                     final user = viewModel.currentUser;
-                                    final int idRol = user != null ? (user['id_rol'] ?? 1) : 1;
+                                    final int idRol = user != null
+                                        ? (user['id_rol'] ?? 1)
+                                        : 1;
                                     _navigateBasedOnRol(idRol);
                                   } else {
                                     if (mounted) {
                                       setState(() {
                                         _localLoading = false;
                                         // Dejamos que lea la traducción del ViewModel sin sobreescribirla
-                                        _localError = ''; 
+                                        _localError = '';
                                       });
                                     }
                                   }
@@ -375,14 +431,17 @@ class _LoginViewState extends State<LoginView> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const RegisterScreen(),
+                                    builder: (context) =>
+                                        const RegisterScreen(),
                                   ),
                                 );
                               },
                         child: Text(
                           'Regístrate ahora',
                           style: TextStyle(
-                            color: estaCargando ? Colors.grey : const Color(0xFF2563EB),
+                            color: estaCargando
+                                ? Colors.grey
+                                : const Color(0xFF2563EB),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -444,7 +503,10 @@ class _LoginViewState extends State<LoginView> {
             : null,
         filled: true,
         fillColor: enabled ? Colors.white : Colors.grey.shade100,
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 20,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
@@ -477,7 +539,7 @@ class _LoginViewState extends State<LoginView> {
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 14),
         side: BorderSide(
-          color: onTap == null ? Colors.grey.shade300 : const Color(0xFFE2E8F0), 
+          color: onTap == null ? Colors.grey.shade300 : const Color(0xFFE2E8F0),
           width: 1.5,
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -487,12 +549,16 @@ class _LoginViewState extends State<LoginView> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           isGoogle
-              ? Icon(Icons.g_mobiledata, 
-                  color: onTap == null ? Colors.grey : Colors.red, 
-                  size: 26)
-              : Icon(icon, 
-                  color: onTap == null ? Colors.grey : Colors.black, 
-                  size: 20),
+              ? Icon(
+                  Icons.g_mobiledata,
+                  color: onTap == null ? Colors.grey : Colors.red,
+                  size: 26,
+                )
+              : Icon(
+                  icon,
+                  color: onTap == null ? Colors.grey : Colors.black,
+                  size: 20,
+                ),
           const SizedBox(width: 8),
           Text(
             label,
