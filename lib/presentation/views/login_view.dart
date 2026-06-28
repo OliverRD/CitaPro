@@ -4,6 +4,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../viewmodels/login_viewmodel.dart';
 import 'main_navigation_screen.dart';
 import 'register_screen.dart';
+import 'admin_navigationscreen.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -235,7 +236,7 @@ class _LoginViewState extends State<LoginView> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const MainNavigationScreen(),
+                                            const AdminNavigationScreen(),
                                       ),
                                     );
                                     break;

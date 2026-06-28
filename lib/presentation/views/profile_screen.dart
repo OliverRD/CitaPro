@@ -4,11 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../viewmodels/profile_viewmodel.dart';
 import 'login_view.dart';
+import 'businessregistration_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final bool isAdmin;
+  const ProfileScreen({super.key, this.isAdmin = false});
 
-  // Función interna para desplegar el menú inferior de opciones de foto
   Future<void> _mostrarOpcionesFoto(
     BuildContext context,
     ProfileViewModel viewModel,
@@ -18,13 +19,11 @@ class ProfileScreen extends StatelessWidget {
     Future<void> procesarSeleccion(ImageSource source) async {
       final XFile? image = await picker.pickImage(
         source: source,
-        imageQuality: 70, // Optimiza el tamaño para el Storage de Supabase
+        imageQuality: 70,
       );
-
       if (image != null) {
-        if (context.mounted) Navigator.pop(context); // Cierra el menú inferior
+        if (context.mounted) Navigator.pop(context);
         File archivoImagen = File(image.path);
-
         await viewModel.subirFotoUsuario(archivoImagen);
       }
     }
@@ -40,7 +39,7 @@ class ProfileScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Wrap(
-              children: <Widget>[
+              children: [
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12.0),
@@ -83,7 +82,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Gestiona el estado de la pantalla mediante Provider
     return ChangeNotifierProvider(
       create: (_) => ProfileViewModel(),
       child: Consumer<ProfileViewModel>(
@@ -143,7 +141,7 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
-                        // Foto Central del Perfil
+                        // Foto de perfil
                         Center(
                           child: Column(
                             children: [
@@ -204,12 +202,14 @@ class ProfileScreen extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF6D28D9),
+                                  color: isAdmin
+                                      ? const Color(0xFF2563EB)
+                                      : const Color(0xFF6D28D9),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Text(
-                                  'Miembro Premium',
-                                  style: TextStyle(
+                                child: Text(
+                                  isAdmin ? 'Administrador' : 'Miembro Premium',
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
@@ -221,6 +221,7 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 32),
 
+                        // Información de cuenta
                         _buildSectionCard(
                           title: 'Información de la Cuenta',
                           editText: 'Editar',
@@ -242,77 +243,123 @@ class ProfileScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
 
-                        _buildSectionCard(
-                          title: 'Métodos de Pago',
-                          showAddIcon: true,
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF1D4ED8), Color(0xFF6D28D9)],
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
+                        // Banner según rol
+                        if (isAdmin) ...[
+                          _buildSectionCard(
+                            title: 'Mi Negocio',
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: const [
-                                    Icon(Icons.nfc, color: Colors.white),
-                                    Icon(
-                                      Icons.credit_card,
-                                      color: Colors.white,
-                                    ),
-                                  ],
+                                _buildConfigRow(
+                                  Icons.store_outlined,
+                                  'Información del negocio',
                                 ),
-                                const SizedBox(height: 20),
-                                const Text(
-                                  'Tarjeta Principal',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                  ),
+                                const Divider(),
+                                _buildConfigRow(
+                                  Icons.people_outline,
+                                  'Gestionar profesionales',
                                 ),
-                                const SizedBox(height: 4),
-                                const Text(
-                                  '•••• •••• •••• 4242',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 2,
-                                  ),
+                                const Divider(),
+                                _buildConfigRow(
+                                  Icons.design_services_outlined,
+                                  'Gestionar servicios',
+                                ),
+                                const Divider(),
+                                _buildConfigRow(
+                                  Icons.bar_chart_outlined,
+                                  'Reportes y estadísticas',
                                 ),
                               ],
                             ),
                           ),
-                        ),
+                        ] else ...[
+                          InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const BusinessIntroView(),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(20),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF1D4ED8),
+                                    Color(0xFF6D28D9),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '¿Tienes un negocio?',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Regístrate y comienza a gestionar tus citas hoy mismo.',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 20),
 
+                        // Configuración general
                         _buildSectionCard(
-                          title: 'Direcciones Guardadas',
+                          title: 'Configuración',
                           child: Column(
                             children: [
-                              _buildAddressRow(
-                                Icons.home_outlined,
-                                'Casa',
-                                '123 Market St, San Francisco...',
+                              _buildConfigRow(
+                                Icons.credit_card,
+                                'Métodos de Pago',
                               ),
-                              const Divider(height: 20),
-                              _buildAddressRow(
-                                Icons.business_center_outlined,
-                                'Oficina',
-                                '456 Tech Blvd, Suite 200...',
+                              const Divider(),
+                              _buildConfigRow(
+                                Icons.location_on_outlined,
+                                'Direcciones Guardadas',
+                              ),
+                              const Divider(),
+                              _buildConfigRow(
+                                Icons.notifications_outlined,
+                                'Preferencias de Notificación',
+                              ),
+                              const Divider(),
+                              _buildConfigRow(
+                                Icons.lock_outline,
+                                'Seguridad y Privacidad',
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 20),
 
-                        // Cierra la sesión actual y redirige al login
+                        // Cerrar sesión
                         TextButton.icon(
                           onPressed: () async {
                             await viewModel.signOut();
@@ -430,41 +477,11 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAddressRow(IconData icon, String label, String address) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: Colors.blue),
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B),
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                address,
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-        const Icon(Icons.more_vert, color: Color(0xFF94A3B8)),
-      ],
+  Widget _buildConfigRow(IconData icon, String label) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.blue),
+      title: Text(label, style: const TextStyle(fontSize: 14)),
+      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
     );
   }
 }
