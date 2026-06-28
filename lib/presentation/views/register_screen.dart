@@ -382,8 +382,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 ? null
                                 : () async {
                                     FocusScope.of(context).unfocus();
-                                    final exito = await context.read<LoginViewModel>().loginWithGoogle();
-                                    if (exito && mounted) {
+                                    final usuario = await _authRepository.signInWithGoogle();
+                                    if (usuario != null && mounted) {
                                       Navigator.pop(context);
                                     }
                                   },

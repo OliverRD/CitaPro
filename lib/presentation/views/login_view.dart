@@ -381,7 +381,7 @@ class _LoginViewState extends State<LoginView> {
                                   final exito = await viewModel
                                       .loginWithGoogle();
 
-                                  if (exito && mounted) {
+                                  if (exito == true && mounted) {
                                     final user = viewModel.currentUser;
                                     final int idRol = user != null
                                         ? (user['id_rol'] ?? 1)
