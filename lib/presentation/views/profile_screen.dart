@@ -237,7 +237,6 @@ class ProfileScreen extends StatelessWidget {
                           const Divider(height: 24),
                           _buildInfoRow(
                             'Número de Teléfono',
-                            // 🔥 CORRECCIÓN: Renderiza el valor real mapeado por el ViewModel
                             viewModel.userPhone.isNotEmpty
                                 ? viewModel.userPhone
                                 : 'No registrado',

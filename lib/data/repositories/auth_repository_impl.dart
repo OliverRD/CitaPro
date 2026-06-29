@@ -53,10 +53,6 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       print('=== Iniciando registro Auth: $email ===');
 
-      // 1. Registro puro en Auth.
-      // Se envían los metadatos necesarios dentro de 'data'.
-      // El Trigger en tu panel de Supabase se encargará de interceptar esta creación
-      // y generar la fila correspondiente en la tabla 'usuarios' de forma segura y única.
       await _supabaseClient.auth.signUp(
         email: email,
         password: password,
@@ -90,8 +86,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       if (!iniciado) return null;
 
-      // 🔥 IMPORTANTE: Damos un pequeño margen de tiempo (1.5 segundos)
-      // para que el Trigger asíncrono en la nube termine de estructurar el perfil.
       await Future.delayed(const Duration(milliseconds: 1500));
 
       final User? user = _supabaseClient.auth.currentUser;

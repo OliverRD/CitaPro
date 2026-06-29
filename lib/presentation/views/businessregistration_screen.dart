@@ -3,8 +3,6 @@ import 'package:flutter_application_1/presentation/views/captcha_screen.dart';
 import 'package:flutter_application_1/presentation/views/category_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'captcha_screen.dart';
-import 'category_screen.dart';
 
 class BusinessIntroView extends StatelessWidget {
   const BusinessIntroView({super.key});
@@ -133,7 +131,7 @@ class BusinessIntroView extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CategoryScreen(),
+                            builder: (context) => const CaptchaScreen(),
                           ),
                         );
                       },
