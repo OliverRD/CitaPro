@@ -82,7 +82,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 Escucha el ViewModel global asignado en el main.dart
     final viewModel = context.watch<ProfileViewModel>();
 
     final String? fotoUrl = viewModel.userPhotoUrl;

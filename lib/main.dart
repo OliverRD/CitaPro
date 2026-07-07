@@ -7,7 +7,7 @@ import 'domain/usecases/auth/login_usecase.dart';
 import 'domain/usecases/auth/login_with_google_usecase.dart';
 import 'presentation/viewmodels/login_viewmodel.dart';
 import 'presentation/viewmodels/booking_viewmodel.dart';
-import 'presentation/viewmodels/profile_viewmodel.dart'; // Importación añadida
+import 'presentation/viewmodels/profile_viewmodel.dart';
 import 'presentation/views/login_view.dart';
 import 'presentation/views/main_navigation_screen.dart';
 import 'presentation/views/admin_navigationscreen.dart';
@@ -52,7 +52,7 @@ class MyApp extends StatelessWidget {
           },
         ),
 
-        // 🔥 PROVEEDOR GLOBAL ASIGNADO: Mantiene los datos del perfil vivos
+        // Proveedor del ProfileViewModel
         ChangeNotifierProvider(create: (context) => ProfileViewModel()),
 
         // Gestiona las reservas de Barbería El Maestro y Zen Spa Wellness
