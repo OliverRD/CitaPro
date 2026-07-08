@@ -39,7 +39,7 @@ class ProfileViewModel extends ChangeNotifier {
         // Si hay una nueva sesión activa, cargamos los datos del usuario correspondiente
         await loadUserData();
       } else if (event == AuthChangeEvent.signedOut) {
-        // 🔥 Si se cierra la sesión, limpiamos el estado por completo inmediatamente
+        //  Si se cierra la sesión, limpiamos el estado por completo inmediatamente
         _clearUserData();
       }
     });
@@ -68,7 +68,7 @@ class ProfileViewModel extends ChangeNotifier {
                       'Usuario')
                   .toString()
                   .trim();
-          _userPhone = (data['telefono'] ?? '').toString().trim();
+          _userPhone = (data['telefonoUser'] ?? '').toString().trim();
 
           if (data['foto'] != null &&
               data['foto'].toString().isNotEmpty &&
@@ -88,7 +88,7 @@ class ProfileViewModel extends ChangeNotifier {
     } catch (e) {
       _userName = 'Error al cargar';
       _errorMessage = e.toString();
-      debugPrint('--- ❌ ERROR EN PROFILE_VIEWMODEL: $e');
+      debugPrint('---  ERROR EN PROFILE_VIEWMODEL: $e');
     } finally {
       _isLoading = false;
       if (hasListeners) notifyListeners();

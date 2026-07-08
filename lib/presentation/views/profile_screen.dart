@@ -82,7 +82,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 Escucha el ViewModel global asignado en el main.dart
     final viewModel = context.watch<ProfileViewModel>();
 
     final String? fotoUrl = viewModel.userPhotoUrl;
@@ -237,7 +236,6 @@ class ProfileScreen extends StatelessWidget {
                           const Divider(height: 24),
                           _buildInfoRow(
                             'Número de Teléfono',
-                            // 🔥 CORRECCIÓN: Renderiza el valor real mapeado por el ViewModel
                             viewModel.userPhone.isNotEmpty
                                 ? viewModel.userPhone
                                 : 'No registrado',

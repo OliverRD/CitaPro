@@ -4,7 +4,7 @@ import '../../domain/usecases/auth/login_usecase.dart';
 
 class LoginViewModel extends ChangeNotifier {
   final LoginUseCase _loginUseCase;
-  // 🔥 CORRECCIÓN 1: Guardar el caso de uso de Google como variable de clase
+  //  Guardar el caso de uso de Google como variable de clase
   final LoginWithGoogleUseCase _loginWithGoogleUseCase;
 
   LoginViewModel(
@@ -48,7 +48,7 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 🔥 CORRECCIÓN 2: El UseCase debe retornar el mapa/modelo del usuario autenticado
+      //  El UseCase debe retornar el mapa/modelo del usuario autenticado
       final userResult = await _loginUseCase.call(
         email: email,
         password: password,
@@ -67,7 +67,7 @@ class LoginViewModel extends ChangeNotifier {
     }
   }
 
-  // 🔥 CORRECCIÓN 3: Implementación real del login con Google
+  // Implementación real del login con Google
   Future<bool> loginWithGoogle() async {
     _isLoading = true;
     _errorMessage = '';

@@ -16,7 +16,7 @@ class _CaptchaScreenState extends State<CaptchaScreen> {
   bool _isLoading = true;
 
   final String _siteKey =
-      '10000000-ffff-ffff-ffff-000000000001'; // Clave de sitio de prueba de hCaptcha
+      'd82cd5ec-c84a-4dae-b96a-f092d43867b4'; // Clave de sitio de hCaptcha
 
   String get _captchaHtml =>
       '''
