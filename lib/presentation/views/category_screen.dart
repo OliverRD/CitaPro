@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/presentation/viewmodels/categoria_viewmodel.dart';
-import 'package:flutter_application_1/domain/usecases/categoria_entity.dart';
+//import 'package:flutter_application_1/domain/usecases/categoria_entity.dart';
 import 'package:flutter_application_1/presentation/views/business_form_screen.dart';
 
 class CategoryScreen extends StatefulWidget {
