@@ -4,6 +4,7 @@ import 'profile_screen.dart';
 import 'clientes_screen.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/dashboard_viewmodel.dart';
+import 'admin_citas_screen.dart';
 
 class AdminNavigationScreen extends StatefulWidget {
   const AdminNavigationScreen({super.key});
@@ -22,9 +23,7 @@ class _AdminNavigationScreenState extends State<AdminNavigationScreen> {
     super.initState();
     _screens = [
       const DashboardScreen(),
-      const Center(
-        child: Text('Citas', style: TextStyle(color: Color(0xFF64748B))),
-      ),
+      const AdminCitasScreen(),
       const Center(
         child: Text('Calendario', style: TextStyle(color: Color(0xFF64748B))),
       ),

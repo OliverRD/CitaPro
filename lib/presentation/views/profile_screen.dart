@@ -208,7 +208,7 @@ class ProfileScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              isAdmin ? 'Administrador' : 'Miembro Premium',
+                              isAdmin ? 'Administrador' : 'Miembro',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,

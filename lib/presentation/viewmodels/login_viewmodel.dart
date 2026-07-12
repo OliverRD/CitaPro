@@ -7,10 +7,7 @@ class LoginViewModel extends ChangeNotifier {
   //  Guardar el caso de uso de Google como variable de clase
   final LoginWithGoogleUseCase _loginWithGoogleUseCase;
 
-  LoginViewModel(
-    this._loginUseCase,
-    this._loginWithGoogleUseCase, // Asignación correcta en constructor
-  );
+  LoginViewModel(this._loginUseCase, this._loginWithGoogleUseCase);
 
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -54,8 +51,7 @@ class LoginViewModel extends ChangeNotifier {
         password: password,
       );
 
-      _currentUser =
-          userResult; // Ahora la vista sí podrá leer el id_rol y nombreUser
+      _currentUser = userResult;
       _isLoading = false;
       notifyListeners();
       return true;
@@ -75,7 +71,7 @@ class LoginViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Llama a tu caso de uso de Google (debe retornar también el mapa de usuario de Supabase)
+      // Caso de uso de Google para iniciar sesión
       final userResult = await _loginWithGoogleUseCase.call();
 
       _currentUser = userResult;

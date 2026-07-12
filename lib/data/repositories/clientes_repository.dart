@@ -25,7 +25,7 @@ class ClientesRepository implements IClientesRepository {
         .select('''
           id_usuario, "nombreUser", "telefonoUser", "correoUser", foto,
           citas!citas_id_cliente_fkey(
-            fecha_cita, total,
+            fecha_cita, total, estado,
             detalle_cita(
               servicios(nombre)
             )
@@ -46,7 +46,7 @@ class ClientesRepository implements IClientesRepository {
         .select('''
           id_usuario, "nombreUser", "telefonoUser", "correoUser", foto,
           citas!citas_id_cliente_fkey(
-            fecha_cita, total,
+            fecha_cita, total, estado,
             detalle_cita(
               servicios(nombre)
             )

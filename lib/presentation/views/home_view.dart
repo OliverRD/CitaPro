@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../viewmodels/booking_viewmodel.dart';
 import 'bookings_view.dart';
 
 class HomeView extends StatefulWidget {
@@ -484,16 +482,24 @@ class _HomeViewState extends State<HomeView> {
                                             ],
                                           ),
                                           ElevatedButton(
+                                            // Reemplaza el onPressed del botón "Reservar Ya" en HomeView:
                                             onPressed: () {
+                                              final idNegocio =
+                                                  service['id_negocio'] as int;
                                               final nombreNegocio =
                                                   service['nombre'] ??
                                                   'Establecimiento';
 
-                                              Provider.of<BookingViewModel>(
+                                              Navigator.push(
                                                 context,
-                                                listen: false,
-                                              ).seleccionarBarberia(
-                                                nombreNegocio,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BookingsView(
+                                                        idNegocio: idNegocio,
+                                                        nombreNegocio:
+                                                            nombreNegocio,
+                                                      ),
+                                                ),
                                               );
 
                                               ScaffoldMessenger.of(

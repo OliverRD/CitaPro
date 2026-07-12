@@ -16,7 +16,7 @@ class _CaptchaScreenState extends State<CaptchaScreen> {
   bool _isLoading = true;
 
   final String _siteKey =
-      'd82cd5ec-c84a-4dae-b96a-f092d43867b4'; // Clave de sitio de hCaptcha
+      '55424a7c-261e-4c04-879c-3638fe300f42'; // Clave de sitio de hCaptcha
 
   String get _captchaHtml =>
       '''
@@ -80,7 +80,7 @@ class _CaptchaScreenState extends State<CaptchaScreen> {
           },
         ),
       )
-      ..loadHtmlString(_captchaHtml);
+      ..loadHtmlString(_captchaHtml, baseUrl: 'https://localhost');
   }
 
   void _continuar() {

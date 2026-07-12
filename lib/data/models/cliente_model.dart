@@ -25,7 +25,8 @@ class ClienteModel extends ClienteEntity {
     double totalInvertido = 0;
     final servicios = <String>{};
 
-    for (final cita in citas) {
+    // ANTES — suma todas las citas sin filtrar:
+    /* for (final cita in citas) {
       final fecha = DateTime.tryParse(cita['fecha_cita'] ?? '');
       if (fecha != null) {
         if (ultimaVisita == null || fecha.isAfter(ultimaVisita)) {
@@ -41,6 +42,39 @@ class ClienteModel extends ClienteEntity {
       for (final detalle in detalles) {
         final nombreServicio = detalle['servicios']?['nombre'];
         if (nombreServicio != null) servicios.add(nombreServicio);
+      }
+    }*/
+
+    // DESPUÉS — solo suma citas completadas o en curso:
+    for (final cita in citas) {
+      final estado = cita['estado'] as String? ?? '';
+
+      // fechas: consideramos todas para saber primera y última visita real
+      // pero solo de citas que sí se realizaron
+      final contable = ['completada', 'en_curso'].contains(estado);
+
+      final fecha = DateTime.tryParse(cita['fecha_cita'] ?? '');
+      if (fecha != null && contable) {
+        if (ultimaVisita == null || fecha.isAfter(ultimaVisita)) {
+          ultimaVisita = fecha;
+        }
+        if (primeraVisita == null || fecha.isBefore(primeraVisita)) {
+          primeraVisita = fecha;
+        }
+      }
+
+      // solo suma el dinero de citas que sí se pagaron/completaron
+      if (contable) {
+        totalInvertido += (cita['total'] as num?)?.toDouble() ?? 0;
+      }
+
+      // solo agrega servicios de citas que sí se realizaron
+      if (contable) {
+        final detalles = cita['detalle_cita'] as List? ?? [];
+        for (final detalle in detalles) {
+          final nombreServicio = detalle['servicios']?['nombre'];
+          if (nombreServicio != null) servicios.add(nombreServicio);
+        }
       }
     }
 

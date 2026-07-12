@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'bookings_view.dart'; 
-import 'profile_screen.dart'; 
-import 'home_view.dart'; 
+import 'bookings_view.dart';
+import 'profile_screen.dart';
+import 'home_view.dart';
 import 'history_view.dart';
 import '../viewmodels/profile_viewmodel.dart';
+
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -13,7 +14,7 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 0; 
+  int _currentIndex = 0;
 
   late final List<Widget> _screens;
 
@@ -21,25 +22,27 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void initState() {
     super.initState();
     _screens = [
-      const HomeView(), 
+      const HomeView(),
       const BookingsView(),
       const HistoryView(),
       ChangeNotifierProvider(
         create: (_) => ProfileViewModel(),
         child: const ProfileScreen(),
       ),
-      const Center(child: Text('Pantalla de Historial', style: TextStyle(color: Color(0xFF64748B)))),
-      const ProfileScreen(), 
+      const Center(
+        child: Text(
+          'Pantalla de Historial',
+          style: TextStyle(color: Color(0xFF64748B)),
+        ),
+      ),
+      const ProfileScreen(),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens, 
-      ),
+      body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -49,7 +52,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF0061FF), 
+        selectedItemColor: const Color(0xFF0061FF),
         unselectedItemColor: const Color(0xFF94A3B8),
         selectedFontSize: 12,
         unselectedFontSize: 12,
@@ -66,12 +69,21 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: _currentIndex == 1
                   ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0061FF), // Fondo azul estilizado para el botón activo
+                        color: const Color(
+                          0xFF0061FF,
+                        ), // Fondo azul estilizado para el botón activo
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Icon(Icons.calendar_month, color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.calendar_month,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     )
                   : const Icon(Icons.calendar_month_outlined),
             ),
