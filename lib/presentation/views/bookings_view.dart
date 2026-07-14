@@ -19,16 +19,17 @@ class _BookingsViewState extends State<BookingsView> {
   @override
   void initState() {
     super.initState();
-    final vm = Provider.of<BookingViewModel>(context, listen: false);
-    vm.cargarMisCitas();
 
-    // Si viene desde HomeView con un negocio seleccionado,
-    // carga servicios y profesionales automáticamente
+    final vm = Provider.of<BookingViewModel>(context, listen: false);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      vm.cargarMisCitas();
+    });
+
     if (widget.idNegocio != null) {
-      vm.cargarServicios(widget.idNegocio!);
-      vm.cargarProfesionales(widget.idNegocio!);
-      // Abre el formulario de nueva cita automáticamente
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        vm.cargarServicios(widget.idNegocio!);
+        vm.cargarProfesionales(widget.idNegocio!);
         _mostrarFormularioNuevaCita(context, vm);
       });
     }
@@ -101,8 +102,6 @@ class _BookingsViewState extends State<BookingsView> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Lista de reservas directas sin Tabs intermedios
               Expanded(
                 child: vm.isLoading
                     ? const Center(
@@ -168,7 +167,7 @@ class _BookingsViewState extends State<BookingsView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => ChangeNotifierProvider.value(
-        value: vm, // ← pasa el mismo vm al BottomSheet
+        value: vm,
         child: _FormularioNuevaCita(
           idNegocio: widget.idNegocio!,
           nombreNegocio: widget.nombreNegocio ?? 'Negocio',
@@ -177,7 +176,7 @@ class _BookingsViewState extends State<BookingsView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  'Cita solicitada con éxito',
+                  'Cita solicitado con éxito',
                   style: GoogleFonts.poppins(fontSize: 13),
                 ),
                 backgroundColor: Colors.green,
@@ -398,18 +397,8 @@ class _TarjetaCita extends StatelessWidget {
     try {
       final dt = DateTime.parse(fecha);
       const meses = [
-        'ene',
-        'feb',
-        'mar',
-        'abr',
-        'may',
-        'jun',
-        'jul',
-        'ago',
-        'sep',
-        'oct',
-        'nov',
-        'dic',
+        'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+        'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
       ];
       return '${dt.day} ${meses[dt.month - 1]} ${dt.year}';
     } catch (_) {
@@ -528,8 +517,6 @@ class _TarjetaCita extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-
-            // Fecha y hora
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
@@ -620,8 +607,6 @@ class _TarjetaCita extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Total
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -642,8 +627,6 @@ class _TarjetaCita extends StatelessWidget {
                 ),
               ],
             ),
-
-            // Botón cancelar solo para citas activas
             if (esProxima &&
                 ['pendiente', 'confirmada'].contains(booking.status)) ...[
               const SizedBox(height: 12),
@@ -720,8 +703,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Servicios
                 Text(
                   'Servicios',
                   style: GoogleFonts.poppins(
@@ -773,8 +754,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                           }).toList(),
                         ),
                       ),
-
-                // Total dinámico
                 if (vm.serviciosSeleccionados.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Container(
@@ -809,8 +788,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 16),
-
-                // Profesional
                 Text(
                   'Profesional',
                   style: GoogleFonts.poppins(
@@ -871,8 +848,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                         ),
                       ),
                 const SizedBox(height: 16),
-
-                // Fecha y hora
                 Row(
                   children: [
                     Expanded(
@@ -931,8 +906,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-
-                // Indicador disponibilidad
                 if (vm.isValidando)
                   Row(
                     children: [
@@ -1018,10 +991,7 @@ class _FormularioNuevaCita extends StatelessWidget {
                       ],
                     ),
                   ),
-
                 const SizedBox(height: 16),
-
-                // Error
                 if (vm.errorFormulario != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -1040,18 +1010,16 @@ class _FormularioNuevaCita extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                // Botón
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed:
                         vm.isGuardando || !vm.formularioValido || vm.isValidando
-                        ? null
-                        : () async {
-                            final ok = await vm.guardarCita(idNegocio);
-                            if (ok && context.mounted) onExito();
-                          },
+                            ? null
+                            : () async {
+                                final ok = await vm.guardarCita(idNegocio);
+                                if (ok && context.mounted) onExito();
+                              },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4F46E5),
                       disabledBackgroundColor: const Color(0xFFCBD5E1),
@@ -1070,9 +1038,7 @@ class _FormularioNuevaCita extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            ocupado
-                                ? 'Horario no disponible'
-                                : 'Solicitar cita',
+                            ocupado ? 'Horario no disponible' : 'Solicitar cita',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,

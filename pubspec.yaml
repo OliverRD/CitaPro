@@ -20,7 +20,7 @@ dependencies:
   google_sign_in: ^7.2.0
   google_fonts: ^8.1.0
   flutter_svg: ^2.3.0
-  webview_flutter: ^4.14.0
+  webview_flutter: ^4.14.0 # ⬅️ Nos quedamos con el oficial de Google
   font_awesome_flutter: ^11.0.0
 
 dev_dependencies:
@@ -58,3 +58,4 @@ flutter:
     - assets/images/business.png
     - assets/Light.png
     - assets/SVG.png
+    - assets/captcha.html
