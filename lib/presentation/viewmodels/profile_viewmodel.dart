@@ -32,7 +32,6 @@ class ProfileViewModel extends ChangeNotifier {
       data,
     ) async {
       final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
 
       if (event == AuthChangeEvent.signedIn ||
           event == AuthChangeEvent.tokenRefreshed) {

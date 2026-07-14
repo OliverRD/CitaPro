@@ -16,8 +16,6 @@ class BookingsView extends StatefulWidget {
 }
 
 class _BookingsViewState extends State<BookingsView> {
-  String _activeTab = 'Próximos';
-
   @override
   void initState() {
     super.initState();
@@ -98,32 +96,13 @@ class _BookingsViewState extends State<BookingsView> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24, vertical: 6),
                 child: Text(
-                  'Gestiona tus citas próximas y tu historial.',
+                  'Gestiona tus citas próximas.',
                   style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Tabs
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(child: _buildTab('Próximos')),
-                      Expanded(child: _buildTab('Pasados')),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Lista
+              // Lista de reservas directas sin Tabs intermedios
               Expanded(
                 child: vm.isLoading
                     ? const Center(
@@ -134,47 +113,12 @@ class _BookingsViewState extends State<BookingsView> {
                     : RefreshIndicator(
                         color: const Color(0xFF4F46E5),
                         onRefresh: vm.cargarMisCitas,
-                        child: _activeTab == 'Próximos'
-                            ? _buildLista(vm.upcomingBookings, vm, true)
-                            : _buildLista(vm.pastBookings, vm, false),
+                        child: _buildLista(vm.upcomingBookings, vm, true),
                       ),
               ),
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildTab(String nombre) {
-    final activo = _activeTab == nombre;
-    return GestureDetector(
-      onTap: () => setState(() => _activeTab = nombre),
-      child: Container(
-        margin: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: activo ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: activo
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: Text(
-            nombre,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: activo ? FontWeight.bold : FontWeight.w500,
-              color: activo ? const Color(0xFF1E293B) : const Color(0xFF64748B),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -192,7 +136,7 @@ class _BookingsViewState extends State<BookingsView> {
             ),
             const SizedBox(height: 12),
             Text(
-              esProxima ? 'No tienes citas próximas' : 'No hay citas pasadas',
+              'No tienes citas próximas',
               style: GoogleFonts.poppins(
                 fontSize: 15,
                 color: const Color(0xFF94A3B8),
@@ -1075,11 +1019,11 @@ class _FormularioNuevaCitaState extends State<_FormularioNuevaCita> {
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: const Color(0xFF16A34A),
-                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
             const SizedBox(height: 16),
 
@@ -1109,13 +1053,13 @@ class _FormularioNuevaCitaState extends State<_FormularioNuevaCita> {
               child: ElevatedButton(
                 onPressed:
                     vm.isGuardando || !vm.formularioValido || vm.isValidando
-                    ? null
-                    : () async {
-                        final ok = await vm.guardarCita(widget.idNegocio);
-                        if (ok && context.mounted) {
-                          widget.onExito();
-                        }
-                      },
+                        ? null
+                        : () async {
+                            final ok = await vm.guardarCita(widget.idNegocio);
+                            if (ok && context.mounted) {
+                              widget.onExito();
+                            }
+                          },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4F46E5),
                   disabledBackgroundColor: const Color(0xFFCBD5E1),
