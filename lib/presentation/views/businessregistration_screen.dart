@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/presentation/views/captcha_screen.dart';
-//import 'package:flutter_application_1/presentation/views/category_screen.dart';
+//import 'package:flutter_application_1/presentation/views/captcha_screen.dart';
+import 'package:flutter_application_1/presentation/views/category_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -131,7 +131,7 @@ class BusinessIntroView extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const CaptchaScreen(),
+                            builder: (context) => const CategoryScreen(),
                           ),
                         );
                       },

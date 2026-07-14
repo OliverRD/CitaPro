@@ -491,7 +491,6 @@ class _AdminCitasScreenState extends State<AdminCitasScreen> {
   }
 }
 
-// ─── TARJETA DE CITA ─────────────────────────────────────────────────────────
 class _TarjetaCita extends StatelessWidget {
   final CitaAdminEntity cita;
   final VoidCallback onTap;

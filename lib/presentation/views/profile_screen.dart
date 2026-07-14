@@ -97,10 +97,10 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: Padding(
+        /* leading: Padding(
           padding: const EdgeInsets.all(8.0),
           child: CircleAvatar(backgroundImage: imageProvider),
-        ),
+        ),*/
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

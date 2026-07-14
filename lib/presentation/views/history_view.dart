@@ -14,11 +14,11 @@ class HistoryView extends StatefulWidget {
 class _HistoryViewState extends State<HistoryView> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _citas = [];
-  
+
   // Variables dinámicas para los paneles de métricas
   double _totalGastado = 0.0;
   int _serviciosCompletados = 0;
-  final double _calificacionMedia = 4.9; 
+  final double _calificacionMedia = 4.9;
 
   @override
   void initState() {
@@ -43,9 +43,6 @@ class _HistoryViewState extends State<HistoryView> {
 
       final int idNumericoCliente = usuarioData['id_usuario'];
 
-      // 2. CONSULTA RELACIONAL MULTINIVEL: Traemos la cita, su negocio, su profesional y sus detalles con servicios
-      // NOTA: Si los nombres de tus tablas en la base de datos están en singular (ej. 'negocio', 'profesional'), 
-      // cambia el nombre antes del paréntesis.
       final List<Map<String, dynamic>> response = await supabase
           .from('citas')
           .select('''
@@ -66,14 +63,18 @@ class _HistoryViewState extends State<HistoryView> {
       double sumatoriaGlobal = 0.0;
       int completados = 0;
 
-      // 3. PROCESAMIENTO DE DATOS: Calculamos los totales sumando los detalles de cada cita
+      // Calculamos los totales sumando los detalles de cada cita
       for (var cita in response) {
         final detalles = cita['detalle_cita'] as List<dynamic>? ?? [];
         double costoTotalCita = 0.0;
 
         for (var det in detalles) {
-          final double precioUnitario = det['precio'] != null ? double.parse(det['precio'].toString()) : 0.0;
-          final int cantidad = det['cantidad'] != null ? int.parse(det['cantidad'].toString()) : 1;
+          final double precioUnitario = det['precio'] != null
+              ? double.parse(det['precio'].toString())
+              : 0.0;
+          final int cantidad = det['cantidad'] != null
+              ? int.parse(det['cantidad'].toString())
+              : 1;
           costoTotalCita += (precioUnitario * cantidad);
         }
 
@@ -97,15 +98,18 @@ class _HistoryViewState extends State<HistoryView> {
       if (!mounted) return;
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error en CitaPro: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error en CitaPro: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFF0D47A1); 
-    const Color backgroundColor = Color(0xFFF5F7FA); 
+    const Color primaryColor = Color(0xFF0D47A1);
+    const Color backgroundColor = Color(0xFFF5F7FA);
     const Color cardColor = Colors.white;
 
     return Scaffold(
@@ -159,10 +163,7 @@ class _HistoryViewState extends State<HistoryView> {
                     const SizedBox(height: 4),
                     Text(
                       'Lleva el control de tus citas pasadas y tu inversión total.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 20),
 
@@ -180,10 +181,17 @@ class _HistoryViewState extends State<HistoryView> {
                               backgroundColor: cardColor,
                             ),
                             onPressed: () {},
-                            icon: const Icon(Icons.tune, size: 18, color: Colors.grey),
+                            icon: const Icon(
+                              Icons.tune,
+                              size: 18,
+                              color: Colors.grey,
+                            ),
                             label: const Text(
                               'Filtrar por fecha',
-                              style: TextStyle(color: Colors.black87, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
@@ -199,10 +207,17 @@ class _HistoryViewState extends State<HistoryView> {
                               backgroundColor: cardColor,
                             ),
                             onPressed: () {},
-                            icon: const Icon(Icons.file_upload_outlined, size: 18, color: Colors.grey),
+                            icon: const Icon(
+                              Icons.file_upload_outlined,
+                              size: 18,
+                              color: Colors.grey,
+                            ),
                             label: const Text(
                               'Exportar Reporte',
-                              style: TextStyle(color: Colors.black87, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ),
@@ -263,47 +278,64 @@ class _HistoryViewState extends State<HistoryView> {
                             itemCount: _citas.length,
                             itemBuilder: (context, index) {
                               final cita = _citas[index];
-                              
+
                               // 1. Extraer nombre del negocio
-                              final String nombreNegocio = cita['negocio'] != null 
-                                  ? cita['negocio']['nombre'] ?? 'Establecimiento'
+                              final String nombreNegocio =
+                                  cita['negocio'] != null
+                                  ? cita['negocio']['nombre'] ??
+                                        'Establecimiento'
                                   : 'Establecimiento';
 
                               // 2. Extraer nombre del profesional especialista
                               String nombreEspecialista = 'Por asignar';
-                              if (cita['profesionales'] != null && cita['profesionales']['usuarios'] != null) {
-                                nombreEspecialista = cita['profesionales']['usuarios']['nombreUser'] ?? 'Por asignar';
+                              if (cita['profesionales'] != null &&
+                                  cita['profesionales']['usuarios'] != null) {
+                                nombreEspecialista =
+                                    cita['profesionales']['usuarios']['nombreUser'] ??
+                                    'Por asignar';
                               }
 
                               // 3. Extraer el nombre del servicio desde la lista de detalles
                               String nombreServicio = 'Servicio Solicitado';
-                              final detalles = cita['detalle_cita'] as List<dynamic>? ?? [];
-                              if (detalles.isNotEmpty && detalles.first['servicios'] != null) {
-                                nombreServicio = detalles.first['servicios']['nombre'] ?? 'Servicio Solicitado';
+                              final detalles =
+                                  cita['detalle_cita'] as List<dynamic>? ?? [];
+                              if (detalles.isNotEmpty &&
+                                  detalles.first['servicios'] != null) {
+                                nombreServicio =
+                                    detalles.first['servicios']['nombre'] ??
+                                    'Servicio Solicitado';
                                 if (detalles.length > 1) {
-                                  nombreServicio += ' (+${detalles.length - 1})'; // Indica si hay más servicios en la misma cita
+                                  nombreServicio +=
+                                      ' (+${detalles.length - 1})'; // Indica si hay más servicios en la misma cita
                                 }
                               }
 
                               // 4. Extraer costo total de esta cita
-                              final double totalCita = cita['total_calculado'] ?? 0.0;
+                              final double totalCita =
+                                  cita['total_calculado'] ?? 0.0;
 
                               // 5. Formateo de fecha
                               String fechaFormateada = 'Sin fecha';
                               if (cita['fecha_cita'] != null) {
                                 String fechaStr = cita['fecha_cita'].toString();
-                                fechaFormateada = fechaStr.length >= 10 ? fechaStr.substring(0, 10) : fechaStr;
+                                fechaFormateada = fechaStr.length >= 10
+                                    ? fechaStr.substring(0, 10)
+                                    : fechaStr;
                               }
 
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 15.0),
                                 child: _buildAppointmentCard(
-                                  imageUrl: cita['imagen_url'] ?? 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=150',
-                                  serviceName: nombreServicio, 
-                                  businessName: nombreNegocio, 
-                                  date: fechaFormateada, 
-                                  specialistName: nombreEspecialista, 
-                                  specialistAvatar: cita['especialista_avatar'] ?? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
+                                  imageUrl:
+                                      cita['imagen_url'] ??
+                                      'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=150',
+                                  serviceName: nombreServicio,
+                                  businessName: nombreNegocio,
+                                  date: fechaFormateada,
+                                  specialistName: nombreEspecialista,
+                                  specialistAvatar:
+                                      cita['especialista_avatar'] ??
+                                      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
                                   price: '\$${totalCita.toStringAsFixed(2)}',
                                 ),
                               );
@@ -416,7 +448,10 @@ class _HistoryViewState extends State<HistoryView> {
                     width: 60,
                     height: 60,
                     color: Colors.grey[200],
-                    child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               ),
@@ -436,7 +471,11 @@ class _HistoryViewState extends State<HistoryView> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.storefront_rounded, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.storefront_rounded,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           businessName,
@@ -463,12 +502,20 @@ class _HistoryViewState extends State<HistoryView> {
                 children: [
                   const Text(
                     'FECHA',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     date,
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF334155),
+                    ),
                   ),
                 ],
               ),
@@ -477,7 +524,11 @@ class _HistoryViewState extends State<HistoryView> {
                 children: [
                   const Text(
                     'ESPECIALISTA',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -489,7 +540,11 @@ class _HistoryViewState extends State<HistoryView> {
                       const SizedBox(width: 6),
                       Text(
                         specialistName,
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF334155)),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF334155),
+                        ),
                       ),
                     ],
                   ),
@@ -508,7 +563,11 @@ class _HistoryViewState extends State<HistoryView> {
                 children: [
                   const Text(
                     'COSTO TOTAL',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(

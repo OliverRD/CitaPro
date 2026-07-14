@@ -471,7 +471,6 @@ class DetalleCitaAdminScreen extends StatelessWidget {
   }
 }
 
-// ─── BOTONES DE ACCIÓN ───────────────────────────────────────────────────────
 class _BotonesAccion extends StatelessWidget {
   final dynamic cita;
   final int idNegocio;
@@ -671,7 +670,6 @@ class _BotonesAccion extends StatelessWidget {
   }
 }
 
-// ─── WIDGET REUTILIZABLE ─────────────────────────────────────────────────────
 class _SeccionCard extends StatelessWidget {
   final Widget child;
   const _SeccionCard({required this.child});
