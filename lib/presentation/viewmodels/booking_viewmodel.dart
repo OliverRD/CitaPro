@@ -28,7 +28,6 @@ class BookingViewModel extends ChangeNotifier {
   bool profesionalOcupado = false;
   bool isValidando = false;
 
-  // ── Cargar citas del usuario logueado ───────────────────────
   Future<void> cargarMisCitas() async {
     isLoading = true;
     error = null;
@@ -85,7 +84,6 @@ class BookingViewModel extends ChangeNotifier {
     }
   }
 
-  // ── Cargar servicios de un negocio ──────────────────────────
   Future<void> cargarServicios(int idNegocio) async {
     isLoadingServicios = true;
     serviciosSeleccionados.clear();
@@ -106,7 +104,6 @@ class BookingViewModel extends ChangeNotifier {
     }
   }
 
-  // ── Cargar profesionales de un negocio ──────────────────────
   Future<void> cargarProfesionales(int idNegocio) async {
     isLoadingProfesionales = true;
     profesionalSeleccionado = null;
@@ -126,7 +123,6 @@ class BookingViewModel extends ChangeNotifier {
     }
   }
 
-  // ── Selecciones del formulario ───────────────────────────────
   void toggleServicio(Map<String, dynamic> servicio) {
     final id = servicio['id_servicio'] as int;
     final existe = serviciosSeleccionados.any((s) => s['id_servicio'] == id);
@@ -200,7 +196,6 @@ class BookingViewModel extends ChangeNotifier {
     }
   }
 
-  // ── Validación del formulario ────────────────────────────────
   bool get formularioValido =>
       serviciosSeleccionados.isNotEmpty &&
       profesionalSeleccionado != null &&
@@ -208,7 +203,6 @@ class BookingViewModel extends ChangeNotifier {
       horaSeleccionada != null &&
       !profesionalOcupado;
 
-  // ── Guardar cita en Supabase ─────────────────────────────────
   Future<bool> guardarCita(int idNegocio) async {
     if (!formularioValido) return false;
 

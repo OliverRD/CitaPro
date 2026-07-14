@@ -223,26 +223,28 @@ class _BookingsViewState extends State<BookingsView> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => _FormularioNuevaCita(
-        idNegocio: widget.idNegocio!,
-        nombreNegocio: widget.nombreNegocio ?? 'Negocio',
-        vm: vm,
-        onExito: () {
-          Navigator.pop(ctx);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Cita solicitada con éxito',
-                style: GoogleFonts.poppins(fontSize: 13),
+      builder: (ctx) => ChangeNotifierProvider.value(
+        value: vm, // ← pasa el mismo vm al BottomSheet
+        child: _FormularioNuevaCita(
+          idNegocio: widget.idNegocio!,
+          nombreNegocio: widget.nombreNegocio ?? 'Negocio',
+          onExito: () {
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Cita solicitada con éxito',
+                  style: GoogleFonts.poppins(fontSize: 13),
+                ),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -382,7 +384,6 @@ class _BookingsViewState extends State<BookingsView> {
   }
 }
 
-// ─── TARJETA DE CITA ─────────────────────────────────────────────────────────
 class _TarjetaCita extends StatelessWidget {
   final Booking booking;
   final bool esProxima;
@@ -726,432 +727,426 @@ class _TarjetaCita extends StatelessWidget {
   }
 }
 
-// ─── FORMULARIO NUEVA CITA ────────────────────────────────────────────────────
-class _FormularioNuevaCita extends StatefulWidget {
+class _FormularioNuevaCita extends StatelessWidget {
   final int idNegocio;
   final String nombreNegocio;
-  final BookingViewModel vm;
   final VoidCallback onExito;
 
   const _FormularioNuevaCita({
     required this.idNegocio,
     required this.nombreNegocio,
-    required this.vm,
     required this.onExito,
   });
 
   @override
-  State<_FormularioNuevaCita> createState() => _FormularioNuevaCitaState();
-}
-
-class _FormularioNuevaCitaState extends State<_FormularioNuevaCita> {
-  @override
   Widget build(BuildContext context) {
-    final vm = widget.vm;
-    final ocupado = vm.profesionalOcupado;
+    return Consumer<BookingViewModel>(
+      builder: (context, vm, _) {
+        final ocupado = vm.profesionalOcupado;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F0),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nueva cita en ${widget.nombreNegocio}',
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF0F172A),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // ── Servicios (múltiple selección) ──
-            Text(
-              'Servicios',
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF1E293B),
-              ),
-            ),
-            const SizedBox(height: 6),
-            vm.isLoadingServicios
-                ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF4F46E5)),
-                  )
-                : Container(
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Column(
-                      children: vm.serviciosDisponibles.map((s) {
-                        final id = s['id_servicio'] as int;
-                        final seleccionado = vm.serviciosSeleccionados.any(
-                          (sel) => sel['id_servicio'] == id,
-                        );
-                        return CheckboxListTile(
-                          value: seleccionado,
-                          activeColor: const Color(0xFF4F46E5),
-                          onChanged: (_) {
-                            setState(() => vm.toggleServicio(s));
-                          },
-                          title: Text(
-                            s['nombre'],
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'RD\$ ${s['precio']} · ${s['duracion']} min',
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              color: const Color(0xFF94A3B8),
-                            ),
-                          ),
-                          controlAffinity: ListTileControlAffinity.leading,
-                          dense: true,
-                        );
-                      }).toList(),
+                      color: const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Nueva cita en $nombreNegocio',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-            // Total dinámico
-            if (vm.serviciosSeleccionados.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
+                // Servicios
+                Text(
+                  'Servicios',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1E293B),
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEEF2FF),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${vm.serviciosSeleccionados.length} servicio(s) · ${vm.duracionTotal} min',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: const Color(0xFF4F46E5),
+                const SizedBox(height: 6),
+                vm.isLoadingServicios
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF4F46E5),
+                        ),
+                      )
+                    : Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Column(
+                          children: vm.serviciosDisponibles.map((s) {
+                            final id = s['id_servicio'] as int;
+                            final seleccionado = vm.serviciosSeleccionados.any(
+                              (sel) => sel['id_servicio'] == id,
+                            );
+                            return CheckboxListTile(
+                              value: seleccionado,
+                              activeColor: const Color(0xFF4F46E5),
+                              onChanged: (_) => vm.toggleServicio(s),
+                              title: Text(
+                                s['nombre'],
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              subtitle: Text(
+                                'RD\$ ${s['precio']} · ${s['duracion']} min',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: const Color(0xFF94A3B8),
+                                ),
+                              ),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              dense: true,
+                            );
+                          }).toList(),
+                        ),
                       ),
-                    ),
-                    Text(
-                      'RD\$ ${vm.totalCalculado.toStringAsFixed(0)}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF4F46E5),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-            const SizedBox(height: 16),
 
-            // ── Profesional ──
-            Text(
-              'Profesional',
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF1E293B),
-              ),
-            ),
-            const SizedBox(height: 6),
-            vm.isLoadingProfesionales
-                ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF4F46E5)),
-                  )
-                : Container(
+                // Total dinámico
+                if (vm.serviciosSeleccionados.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      color: const Color(0xFFEEF2FF),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<Map<String, dynamic>>(
-                        value: vm.profesionalSeleccionado,
-                        isExpanded: true,
-                        hint: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: Text(
-                            'Selecciona un profesional',
-                            style: GoogleFonts.poppins(
-                              fontSize: 14,
-                              color: const Color(0xFF94A3B8),
-                            ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${vm.serviciosSeleccionados.length} servicio(s) · ${vm.duracionTotal} min',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: const Color(0xFF4F46E5),
                           ),
                         ),
-                        items: vm.profesionalesDisponibles.map((p) {
-                          final usuario =
-                              p['usuarios'] as Map<String, dynamic>? ?? {};
-                          return DropdownMenuItem(
-                            value: p,
-                            child: Padding(
+                        Text(
+                          'RD\$ ${vm.totalCalculado.toStringAsFixed(0)}',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF4F46E5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+
+                // Profesional
+                Text(
+                  'Profesional',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                vm.isLoadingProfesionales
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF4F46E5),
+                        ),
+                      )
+                    : Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<Map<String, dynamic>>(
+                            value: vm.profesionalSeleccionado,
+                            isExpanded: true,
+                            hint: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                               ),
                               child: Text(
-                                usuario['nombreUser'] ?? 'Profesional',
-                                style: GoogleFonts.poppins(fontSize: 14),
+                                'Selecciona un profesional',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  color: const Color(0xFF94A3B8),
+                                ),
                               ),
                             ),
+                            items: vm.profesionalesDisponibles.map((p) {
+                              final usuario =
+                                  p['usuarios'] as Map<String, dynamic>? ?? {};
+                              return DropdownMenuItem(
+                                value: p,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  child: Text(
+                                    usuario['nombreUser'] ?? 'Profesional',
+                                    style: GoogleFonts.poppins(fontSize: 14),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (p) {
+                              if (p != null) vm.seleccionarProfesional(p);
+                            },
+                          ),
+                        ),
+                      ),
+                const SizedBox(height: 16),
+
+                // Fecha y hora
+                Row(
+                  children: [
+                    Expanded(
+                      child: _SelectorFechaHora(
+                        label: 'Fecha',
+                        valor: vm.fechaSeleccionada != null
+                            ? '${vm.fechaSeleccionada!.day}/${vm.fechaSeleccionada!.month}/${vm.fechaSeleccionada!.year}'
+                            : 'Seleccionar',
+                        icon: Icons.calendar_today_outlined,
+                        onTap: () async {
+                          final fecha = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 365),
+                            ),
+                            builder: (context, child) => Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Color(0xFF4F46E5),
+                                ),
+                              ),
+                              child: child!,
+                            ),
                           );
-                        }).toList(),
-                        onChanged: (p) {
-                          if (p != null) {
-                            setState(() => vm.seleccionarProfesional(p));
-                          }
+                          if (fecha != null) vm.seleccionarFecha(fecha);
                         },
                       ),
                     ),
-                  ),
-            const SizedBox(height: 16),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _SelectorFechaHora(
+                        label: 'Hora',
+                        valor: vm.horaSeleccionada != null
+                            ? vm.horaSeleccionada!.format(context)
+                            : 'Seleccionar',
+                        icon: Icons.access_time_outlined,
+                        onTap: () async {
+                          final hora = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.now(),
+                            builder: (context, child) => Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: const ColorScheme.light(
+                                  primary: Color(0xFF4F46E5),
+                                ),
+                              ),
+                              child: child!,
+                            ),
+                          );
+                          if (hora != null) vm.seleccionarHora(hora);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-            // ── Fecha y hora ──
-            Row(
-              children: [
-                Expanded(
-                  child: _SelectorFechaHora(
-                    label: 'Fecha',
-                    valor: vm.fechaSeleccionada != null
-                        ? '${vm.fechaSeleccionada!.day}/${vm.fechaSeleccionada!.month}/${vm.fechaSeleccionada!.year}'
-                        : 'Seleccionar',
-                    icon: Icons.calendar_today_outlined,
-                    onTap: () async {
-                      final fecha = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                        builder: (context, child) => Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: Color(0xFF4F46E5),
+                // Indicador disponibilidad
+                if (vm.isValidando)
+                  Row(
+                    children: [
+                      const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Color(0xFF4F46E5),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Verificando disponibilidad...',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  )
+                else if (ocupado &&
+                    vm.profesionalSeleccionado != null &&
+                    vm.fechaSeleccionada != null &&
+                    vm.horaSeleccionada != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEE2E2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.cancel_outlined,
+                          color: Color(0xFFDC2626),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Profesional no disponible en ese horario',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFFDC2626),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (!ocupado &&
+                    vm.profesionalSeleccionado != null &&
+                    vm.fechaSeleccionada != null &&
+                    vm.horaSeleccionada != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDCFCE7),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.check_circle_outline,
+                          color: Color(0xFF16A34A),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Horario disponible ✓',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF16A34A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 16),
+
+                // Error
+                if (vm.errorFormulario != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEE2E2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        vm.errorFormulario!,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: const Color(0xFFDC2626),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                // Botón
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed:
+                        vm.isGuardando || !vm.formularioValido || vm.isValidando
+                        ? null
+                        : () async {
+                            final ok = await vm.guardarCita(idNegocio);
+                            if (ok && context.mounted) onExito();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4F46E5),
+                      disabledBackgroundColor: const Color(0xFFCBD5E1),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: vm.isGuardando
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            ocupado
+                                ? 'Horario no disponible'
+                                : 'Solicitar cita',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
                             ),
                           ),
-                          child: child!,
-                        ),
-                      );
-                      if (fecha != null) {
-                        setState(() => vm.seleccionarFecha(fecha));
-                      }
-                    },
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _SelectorFechaHora(
-                    label: 'Hora',
-                    valor: vm.horaSeleccionada != null
-                        ? vm.horaSeleccionada!.format(context)
-                        : 'Seleccionar',
-                    icon: Icons.access_time_outlined,
-                    onTap: () async {
-                      final hora = await showTimePicker(
-                        context: context,
-                        initialTime: TimeOfDay.now(),
-                        builder: (context, child) => Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: Color(0xFF4F46E5),
-                            ),
-                          ),
-                          child: child!,
-                        ),
-                      );
-                      if (hora != null) {
-                        setState(() => vm.seleccionarHora(hora));
-                      }
-                    },
-                  ),
-                ),
+                const SizedBox(height: 8),
               ],
             ),
-            const SizedBox(height: 12),
-
-            // ── Indicador de disponibilidad ──
-            if (vm.isValidando)
-              Row(
-                children: [
-                  const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Color(0xFF4F46E5),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Verificando disponibilidad...',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: const Color(0xFF64748B),
-                    ),
-                  ),
-                ],
-              )
-            else if (ocupado &&
-                vm.profesionalSeleccionado != null &&
-                vm.fechaSeleccionada != null &&
-                vm.horaSeleccionada != null)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEE2E2),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.cancel_outlined,
-                      color: Color(0xFFDC2626),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Profesional no disponible en ese horario',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFFDC2626),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else if (!ocupado &&
-                vm.profesionalSeleccionado != null &&
-                vm.fechaSeleccionada != null &&
-                vm.horaSeleccionada != null)
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDCFCE7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.check_circle_outline,
-                      color: Color(0xFF16A34A),
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Horario disponible',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF16A34A),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-            const SizedBox(height: 16),
-
-            // ── Error general ──
-            if (vm.errorFormulario != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEE2E2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    vm.errorFormulario!,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: const Color(0xFFDC2626),
-                    ),
-                  ),
-                ),
-              ),
-
-            // ── Botón solicitar ──
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed:
-                    vm.isGuardando || !vm.formularioValido || vm.isValidando
-                    ? null
-                    : () async {
-                        final ok = await vm.guardarCita(widget.idNegocio);
-                        if (ok && context.mounted) {
-                          widget.onExito();
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4F46E5),
-                  disabledBackgroundColor: const Color(0xFFCBD5E1),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: vm.isGuardando
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(
-                        ocupado ? 'Horario no disponible' : 'Solicitar cita',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
 
-// ─── SELECTOR FECHA/HORA ─────────────────────────────────────────────────────
 class _SelectorFechaHora extends StatelessWidget {
   final String label;
   final String valor;

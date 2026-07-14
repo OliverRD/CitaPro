@@ -373,7 +373,6 @@ class DetalleClienteScreen extends StatelessWidget {
   }
 }
 
-//  WIDGETS REUTILIZABLES
 class _SeccionTitulo extends StatelessWidget {
   final String titulo;
   const _SeccionTitulo({required this.titulo});

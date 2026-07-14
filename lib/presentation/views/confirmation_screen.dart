@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import '../../data/models/booking_model.dart'; 
-import 'main_navigation_screen.dart'; 
+import '../../data/models/booking_model.dart';
+import 'main_navigation_screen.dart';
+
 class BookingConfirmationScreen extends StatefulWidget {
-  
   final Booking booking;
 
   const BookingConfirmationScreen({super.key, required this.booking});
 
   @override
-  State<BookingConfirmationScreen> createState() => _BookingConfirmationScreenState();
+  State<BookingConfirmationScreen> createState() =>
+      _BookingConfirmationScreenState();
 }
 
 class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
   @override
   Widget build(BuildContext context) {
-    
     final booking = widget.booking;
 
     return Scaffold(
@@ -54,7 +54,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               const Text(
                 '¡Reserva Confirmada!',
                 style: TextStyle(
@@ -64,17 +64,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              
+
               const Text(
                 'Tu cita ha sido programada con éxito.',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF64748B),
-                ),
+                style: TextStyle(fontSize: 15, color: Color(0xFF64748B)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-              
+
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -90,7 +87,6 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    
                     _buildDetailRow(
                       icon: Icons.storefront_outlined,
                       iconColor: const Color(0xFF3B82F6),
@@ -99,7 +95,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                       value: booking.businessName,
                     ),
                     const Divider(height: 24, color: Color(0xFFF1F5F9)),
-                    
+
                     _buildDetailRow(
                       icon: Icons.business_center_outlined,
                       iconColor: const Color(0xFFA855F7),
@@ -108,7 +104,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                       value: booking.serviceName,
                     ),
                     const Divider(height: 24, color: Color(0xFFF1F5F9)),
-                    
+
                     Row(
                       children: [
                         Expanded(
@@ -117,7 +113,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                             iconColor: const Color(0xFF10B981),
                             bgColor: const Color(0xFFECFDF5),
                             title: 'Fecha',
-                            value: booking.date, 
+                            value: booking.date,
                           ),
                         ),
                         Container(
@@ -131,7 +127,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                             iconColor: const Color(0xFF3B82F6),
                             bgColor: const Color(0xFFEFF6FF),
                             title: 'Hora',
-                            value: booking.time, 
+                            value: booking.time,
                           ),
                         ),
                       ],
@@ -143,19 +139,20 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                       iconColor: const Color(0xFF10B981),
                       bgColor: const Color(0xFFECFDF5),
                       title: 'Estado de Reserva',
-                      value: booking.status, 
+                      value: booking.status,
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 40),
-              
+
               ElevatedButton(
                 onPressed: () {
-                  
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const MainNavigationScreen(),
+                    ),
                     (route) => false,
                   );
                 },
@@ -184,11 +181,14 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               OutlinedButton(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Sincronizando con Google Calendar...'), backgroundColor: Color(0xFF4F46E5)),
+                    const SnackBar(
+                      content: Text('Sincronizando con Google Calendar...'),
+                      backgroundColor: Color(0xFF4F46E5),
+                    ),
                   );
                 },
                 style: OutlinedButton.styleFrom(
@@ -201,7 +201,10 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.calendar_month_outlined, color: Color(0xFF4F46E5)),
+                    Icon(
+                      Icons.calendar_month_outlined,
+                      color: Color(0xFF4F46E5),
+                    ),
                     SizedBox(width: 8),
                     Text(
                       'Añadir al Calendario',
@@ -215,7 +218,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               const Text(
                 'Ref: #CITA-9824-MX',
                 style: TextStyle(
@@ -256,10 +259,7 @@ class _BookingConfirmationScreenState extends State<BookingConfirmationScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  color: Color(0xFF94A3B8),
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
               ),
               const SizedBox(height: 2),
               Text(

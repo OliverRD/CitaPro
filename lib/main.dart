@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/presentation/views/confirmation_screen.dart';
+import 'package:flutter_application_1/presentation/views/register_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'domain/repositories/auth_repository.dart';
@@ -11,6 +13,7 @@ import 'presentation/viewmodels/profile_viewmodel.dart';
 import 'presentation/views/login_view.dart';
 import 'presentation/views/main_navigation_screen.dart';
 import 'presentation/views/admin_navigationscreen.dart';
+import 'presentation/views/confirmation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,7 +92,7 @@ class AuthSessionValidator extends StatelessWidget {
       if (data != null) {
         final int idRol = data['id_rol'] ?? 1;
         if (idRol == 2) {
-          return const AdminNavigationScreen();
+          return const BookingConfirmationScreen();
         }
       }
       return const MainNavigationScreen();
