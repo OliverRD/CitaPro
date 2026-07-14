@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Instancia global de Supabase
 final supabase = Supabase.instance.client;
 
 class HistoryView extends StatefulWidget {
@@ -15,7 +14,6 @@ class _HistoryViewState extends State<HistoryView> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _citas = [];
 
-  // Variables dinámicas para los paneles de métricas
   double _totalGastado = 0.0;
   int _serviciosCompletados = 0;
   final double _calificacionMedia = 4.9;
@@ -34,7 +32,6 @@ class _HistoryViewState extends State<HistoryView> {
         return;
       }
 
-      // 1. PUENTE: Buscamos el id_usuario (int8) usando correoUser
       final usuarioData = await supabase
           .from('usuarios')
           .select('id_usuario')
@@ -63,7 +60,6 @@ class _HistoryViewState extends State<HistoryView> {
       double sumatoriaGlobal = 0.0;
       int completados = 0;
 
-      // Calculamos los totales sumando los detalles de cada cita
       for (var cita in response) {
         final detalles = cita['detalle_cita'] as List<dynamic>? ?? [];
         double costoTotalCita = 0.0;
@@ -78,7 +74,6 @@ class _HistoryViewState extends State<HistoryView> {
           costoTotalCita += (precioUnitario * cantidad);
         }
 
-        // Inyectamos el costo calculado dinámicamente en el mapa de la cita
         cita['total_calculado'] = costoTotalCita;
 
         if (cita['estado'] == 'completado' || cita['estado'] == 'Completado') {
@@ -117,30 +112,36 @@ class _HistoryViewState extends State<HistoryView> {
       appBar: AppBar(
         backgroundColor: backgroundColor,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black87),
-          onPressed: () {},
-        ),
-        title: const Text(
-          'CitaPro',
-          style: TextStyle(
-            color: primaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 18,
-              backgroundImage: const NetworkImage(
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100',
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            RichText(
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Cita',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.normal,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Pro',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4F46E5),
+                    ),
+                  ),
+                ],
               ),
-              backgroundColor: Colors.grey[300],
             ),
-          ),
-        ],
+          ],
+        ),
+        actions: const [],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: primaryColor))
@@ -166,8 +167,6 @@ class _HistoryViewState extends State<HistoryView> {
                       style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                     const SizedBox(height: 20),
-
-                    // Filtros
                     Row(
                       children: [
                         Expanded(
@@ -224,8 +223,6 @@ class _HistoryViewState extends State<HistoryView> {
                       ],
                     ),
                     const SizedBox(height: 25),
-
-                    // Métricas
                     _buildStatCard(
                       icon: Icons.account_balance_wallet_rounded,
                       iconColor: Colors.blue,
@@ -250,7 +247,6 @@ class _HistoryViewState extends State<HistoryView> {
                       value: '$_calificacionMedia/5.0',
                     ),
                     const SizedBox(height: 30),
-
                     const Text(
                       'Citas Recientes',
                       style: TextStyle(
@@ -260,8 +256,6 @@ class _HistoryViewState extends State<HistoryView> {
                       ),
                     ),
                     const SizedBox(height: 15),
-
-                    // Listado
                     _citas.isEmpty
                         ? const Center(
                             child: Padding(
@@ -279,23 +273,20 @@ class _HistoryViewState extends State<HistoryView> {
                             itemBuilder: (context, index) {
                               final cita = _citas[index];
 
-                              // 1. Extraer nombre del negocio
                               final String nombreNegocio =
                                   cita['negocio'] != null
-                                  ? cita['negocio']['nombre'] ??
-                                        'Establecimiento'
-                                  : 'Establecimiento';
+                                      ? cita['negocio']['nombre'] ??
+                                          'Establecimiento'
+                                      : 'Establecimiento';
 
-                              // 2. Extraer nombre del profesional especialista
                               String nombreEspecialista = 'Por asignar';
                               if (cita['profesionales'] != null &&
                                   cita['profesionales']['usuarios'] != null) {
                                 nombreEspecialista =
                                     cita['profesionales']['usuarios']['nombreUser'] ??
-                                    'Por asignar';
+                                        'Por asignar';
                               }
 
-                              // 3. Extraer el nombre del servicio desde la lista de detalles
                               String nombreServicio = 'Servicio Solicitado';
                               final detalles =
                                   cita['detalle_cita'] as List<dynamic>? ?? [];
@@ -303,18 +294,16 @@ class _HistoryViewState extends State<HistoryView> {
                                   detalles.first['servicios'] != null) {
                                 nombreServicio =
                                     detalles.first['servicios']['nombre'] ??
-                                    'Servicio Solicitado';
+                                        'Servicio Solicitado';
                                 if (detalles.length > 1) {
                                   nombreServicio +=
-                                      ' (+${detalles.length - 1})'; // Indica si hay más servicios en la misma cita
+                                      ' (+${detalles.length - 1})';
                                 }
                               }
 
-                              // 4. Extraer costo total de esta cita
                               final double totalCita =
                                   cita['total_calculado'] ?? 0.0;
 
-                              // 5. Formateo de fecha
                               String fechaFormateada = 'Sin fecha';
                               if (cita['fecha_cita'] != null) {
                                 String fechaStr = cita['fecha_cita'].toString();
@@ -326,15 +315,13 @@ class _HistoryViewState extends State<HistoryView> {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 15.0),
                                 child: _buildAppointmentCard(
-                                  imageUrl:
-                                      cita['imagen_url'] ??
+                                  imageUrl: cita['imagen_url'] ??
                                       'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=150',
                                   serviceName: nombreServicio,
                                   businessName: nombreNegocio,
                                   date: fechaFormateada,
                                   specialistName: nombreEspecialista,
-                                  specialistAvatar:
-                                      cita['especialista_avatar'] ??
+                                  specialistAvatar: cita['especialista_avatar'] ??
                                       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
                                   price: '\$${totalCita.toStringAsFixed(2)}',
                                 ),

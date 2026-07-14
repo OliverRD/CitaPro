@@ -5,13 +5,11 @@ import '../../data/models/booking_model.dart';
 class BookingViewModel extends ChangeNotifier {
   final _supabase = Supabase.instance.client;
 
-  // ── Estado general ──────────────────────────────────────────
   List<Booking> upcomingBookings = [];
   List<Booking> pastBookings = [];
   bool isLoading = false;
   String? error;
 
-  // ── Estado del formulario de nueva cita ─────────────────────
   List<Map<String, dynamic>> serviciosDisponibles = [];
   List<Map<String, dynamic>> profesionalesDisponibles = [];
 

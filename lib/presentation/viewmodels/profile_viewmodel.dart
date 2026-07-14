@@ -54,6 +54,9 @@ class ProfileViewModel extends ChangeNotifier {
       if (user != null) {
         _userEmail = user.email ?? '';
 
+        // Extraer foto de respaldo de Google Auth por si la tabla interna no tiene una
+        final String? googlePhotoUrl = user.userMetadata?['avatar_url'] ?? user.userMetadata?['picture'];
+
         final data = await _supabaseClient
             .from('usuarios')
             .select('*')
@@ -69,17 +72,20 @@ class ProfileViewModel extends ChangeNotifier {
                   .trim();
           _userPhone = (data['telefonoUser'] ?? '').toString().trim();
 
+          // Prioridad 1: Foto subida de forma manual en la base de datos
           if (data['foto'] != null &&
               data['foto'].toString().isNotEmpty &&
               data['foto'] != 'NULL') {
             _userPhotoUrl = data['foto'].toString();
           } else {
-            _userPhotoUrl = null;
+            // Prioridad 2: Si no hay foto subida, usa la de la cuenta de Google
+            _userPhotoUrl = googlePhotoUrl;
           }
         } else {
+          // Si el usuario no está aún en la tabla 'usuarios' (primer login de Google)
           _userName = user.userMetadata?['full_name'] ?? 'Usuario';
           _userPhone = '';
-          _userPhotoUrl = null;
+          _userPhotoUrl = googlePhotoUrl;
         }
       } else {
         _clearUserData();
@@ -150,7 +156,6 @@ class ProfileViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    // Cancelamos la suscripción al destruir el ViewModel para evitar fugas de memoria
     _authSubscription?.cancel();
     super.dispose();
   }

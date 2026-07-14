@@ -32,9 +32,16 @@ class _HomeViewState extends State<HomeView> {
   Future<List<Map<String, dynamic>>> _fetchNegociosFromSupabase() async {
     try {
       final response = await _supabase.from('negocio').select('*');
+      
+      if (response.isNotEmpty) {
+        debugPrint('--- DEBUG SUPABASE ---');
+        debugPrint('Columnas detectadas: ${response.first.keys.toList()}');
+        debugPrint('Primer registro completo: ${response.first}');
+      }
+      
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      debugPrint('Error conectando a Supabase: $e');
+      debugPrint('Error: $e');
       return [];
     }
   }
@@ -49,14 +56,8 @@ class _HomeViewState extends State<HomeView> {
         scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage(
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-              ),
-            ),
-            const SizedBox(width: 12),
             RichText(
               text: const TextSpan(
                 children: [
@@ -96,14 +97,12 @@ class _HomeViewState extends State<HomeView> {
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchNegociosFromSupabase(),
         builder: (context, snapshot) {
-          // 1. Estado de carga con indicador circular elegante
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFF4F46E5)),
             );
           }
 
-          // 2. Control de errores si Supabase falla
           if (snapshot.hasError) {
             return const Center(
               child: Text('Error al cargar los negocios reales.'),
@@ -112,14 +111,20 @@ class _HomeViewState extends State<HomeView> {
 
           final listadoNegocios = snapshot.data ?? [];
 
-          // 3. Filtrado dinámico basado en los datos de tu BD
           final servicesToShow = listadoNegocios.where((service) {
-            final matchesCategory =
-                _selectedCategory == 'Todos' ||
-                (service['descripcion'] ?? '')
-                    .toString()
-                    .toLowerCase()
-                    .contains(_selectedCategory.toLowerCase());
+            String limpiarTexto(String texto) {
+              return texto
+                  .toLowerCase()
+                  .trim()
+                  .replaceAll('á', 'a')
+                  .replaceAll('é', 'e')
+                  .replaceAll('í', 'i')
+                  .replaceAll('ó', 'o')
+                  .replaceAll('ú', 'u');
+            }
+
+            final matchesCategory = _selectedCategory == 'Todos' ||
+                limpiarTexto(service['categoria'] ?? '') == limpiarTexto(_selectedCategory);
 
             final matchesSearch = (service['nombre'] ?? '')
                 .toString()
@@ -155,7 +160,6 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(height: 20),
 
-                // Buscador estilizado original
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -217,7 +221,6 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(height: 28),
 
-                // Categorías horizontales
                 SizedBox(
                   height: 44,
                   child: ListView.builder(
@@ -303,13 +306,12 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 const SizedBox(height: 12),
 
-                // Lista Reactiva conectada a tu BD
                 servicesToShow.isEmpty
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.only(top: 40.0),
                           child: Text(
-                            'No se encontraron servicios en la base de datos',
+                            'No se encontraron servicios en esta categoría',
                             style: TextStyle(
                               color: Color(0xFF64748B),
                               fontWeight: FontWeight.w500,
@@ -347,7 +349,6 @@ class _HomeViewState extends State<HomeView> {
                                         topRight: Radius.circular(24),
                                       ),
                                       child: Image.network(
-                                        // Mapeo directo de tu columna 'imagen'
                                         service['imagen'] ??
                                             'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400',
                                         height: 160,
@@ -356,14 +357,14 @@ class _HomeViewState extends State<HomeView> {
                                         errorBuilder:
                                             (context, error, stackTrace) =>
                                                 Container(
-                                                  height: 160,
-                                                  color: Colors.grey[200],
-                                                  child: const Icon(
-                                                    Icons.broken_image,
-                                                    color: Colors.grey,
-                                                    size: 40,
-                                                  ),
-                                                ),
+                                          height: 160,
+                                          color: Colors.grey[200],
+                                          child: const Icon(
+                                            Icons.broken_image,
+                                            color: Colors.grey,
+                                            size: 40,
+                                          ),
+                                        ),
                                       ),
                                     ),
                                     Positioned(
@@ -432,7 +433,6 @@ class _HomeViewState extends State<HomeView> {
                                         ],
                                       ),
                                       const SizedBox(height: 10),
-                                      // Mapeo directo de tu columna 'nombre'
                                       Text(
                                         service['nombre'] ??
                                             'Establecimiento CitaPro',
@@ -443,7 +443,6 @@ class _HomeViewState extends State<HomeView> {
                                         ),
                                       ),
                                       const SizedBox(height: 4),
-                                      // Mapeo directo de tu columna 'descripcion'
                                       Text(
                                         service['descripcion'] ??
                                             'Servicios profesionales garantizados.',
@@ -460,11 +459,11 @@ class _HomeViewState extends State<HomeView> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          const Column(
+                                          Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
+                                              const Text(
                                                 'Desde',
                                                 style: TextStyle(
                                                   fontSize: 11,
@@ -473,7 +472,7 @@ class _HomeViewState extends State<HomeView> {
                                               ),
                                               Text(
                                                 '\$25',
-                                                style: TextStyle(
+                                                style: const TextStyle(
                                                   fontSize: 18,
                                                   fontWeight: FontWeight.bold,
                                                   color: Color(0xFF0061FF),
@@ -482,60 +481,42 @@ class _HomeViewState extends State<HomeView> {
                                             ],
                                           ),
                                           ElevatedButton(
-                                            // Reemplaza el onPressed del botón "Reservar Ya" en HomeView:
                                             onPressed: () {
                                               final idNegocio =
                                                   service['id_negocio'] as int;
                                               final nombreNegocio =
                                                   service['nombre'] ??
-                                                  'Establecimiento';
+                                                      'Establecimiento';
 
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
                                                       BookingsView(
-                                                        idNegocio: idNegocio,
-                                                        nombreNegocio:
-                                                            nombreNegocio,
-                                                      ),
+                                                    idNegocio: idNegocio,
+                                                    nombreNegocio:
+                                                        nombreNegocio,
+                                                  ),
                                                 ),
                                               );
 
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
+                                              ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(
                                                   content: Text(
                                                     'Seleccionaste: $nombreNegocio. Redirigiendo...',
                                                   ),
-                                                  backgroundColor: const Color(
-                                                    0xFF0061FF,
-                                                  ),
-                                                  duration: const Duration(
-                                                    seconds: 1,
-                                                  ),
-                                                ),
-                                              );
-
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const BookingsView(),
+                                                  backgroundColor: const Color(0xFF0061FF),
+                                                  duration: const Duration(seconds: 1),
                                                 ),
                                               );
                                             },
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(
-                                                0xFF0061FF,
-                                              ),
+                                              backgroundColor: const Color(0xFF0061FF),
                                               elevation: 0,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 20,
-                                                    vertical: 12,
-                                                  ),
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 20,
+                                                vertical: 12,
+                                              ),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(12),
