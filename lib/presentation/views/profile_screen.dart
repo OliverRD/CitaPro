@@ -325,14 +325,11 @@ class ProfileScreen extends StatelessWidget {
                     ],
                     const SizedBox(height: 20),
 
-                    // ==========================================
-                    // SECCIÓN DE CONFIGURACIÓN DESPLEGABLE (FIX)
-                    // ==========================================
                     _buildSectionCard(
                       title: 'Configuración',
                       child: Theme(
                         data: Theme.of(context).copyWith(
-                          dividerColor: Colors.transparent, // Quita las líneas internas molestas del tile
+                          dividerColor: Colors.transparent, 
                         ),
                         child: Column(
                           children: [

@@ -22,7 +22,7 @@ dependencies:
   flutter_svg: ^2.3.0
   webview_flutter: ^4.14.0
   font_awesome_flutter: ^11.0.0
-  share_plus: ^10.0.0 # ⬅️ Agregado para que funcione la exportación del historial
+  share_plus: ^10.0.0 
 
 dev_dependencies:
   flutter_test:
@@ -31,19 +31,16 @@ dev_dependencies:
   flutter_native_splash: ^2.4.1
   flutter_launcher_icons: ^0.13.1
 
-# Configuración del Splash apuntando al nuevo PNG de alta resolución
 flutter_native_splash:
   color: "#FFFFFF"
   image: assets/Light.png
   android_gravity: center
   ios_content_mode: center
 
-  # Forza a Android 12+ a usar el nuevo logo nítido
   android_12:
     image: assets/Light.png
     color: "#FFFFFF"
 
-# Configuración para cambiar el logo exterior de la App
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
@@ -53,7 +50,6 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
 
-  # Rutas de recursos alineadas perfectamente con tu árbol de carpetas
   assets:
     - assets/images/undraw_mobile-application_uc2q.svg
     - assets/images/business.png

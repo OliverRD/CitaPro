@@ -26,7 +26,6 @@ class _CalendarioScreenState extends State<CalendarioScreen> {
     final dashVM = Provider.of<DashboardViewModel>(context, listen: false);
 
     if (dashVM.idNegocio == null) {
-      // Espera a que el dashboard cargue
       await dashVM.cargarDashboard();
     }
 

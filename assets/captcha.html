@@ -23,7 +23,6 @@
   <script>
     // Esta función se ejecuta AUTOMÁTICAMENTE cuando Cloudflare valida al usuario
     function onVerify(token) {
-      // Línea corregida compatible con webview_flutter de Google
       window.onCaptchaVerified.postMessage(token);
     }
   </script>

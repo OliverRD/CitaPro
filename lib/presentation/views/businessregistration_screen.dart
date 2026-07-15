@@ -16,8 +16,7 @@ class BusinessIntroView extends StatelessWidget {
       builder: (context) {
         return CaptchaDialog(
           onVerified: (tokenRecibido) {
-            // ¡Humano validado con éxito!
-            // Ahora procedemos a navegar a la siguiente pantalla
+
             Navigator.push(
               context,
               MaterialPageRoute(

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../viewmodels/booking_viewmodel.dart';
 import '../../data/models/booking_model.dart';
 import 'reason_cancel_view.dart';
-// 1. IMPORTANTE: Importa aquí tu pantalla de confirmación
 import 'confirmation_screen.dart'; 
 
 class BookingsView extends StatefulWidget {
@@ -173,11 +172,9 @@ class _BookingsViewState extends State<BookingsView> {
         child: _FormularioNuevaCita(
           idNegocio: widget.idNegocio!,
           nombreNegocio: widget.nombreNegocio ?? 'Negocio',
-          // 2. MODIFICADO: Ahora el callback recibe el objeto 'Booking' creado
           onExito: (Booking nuevaCita) {
             Navigator.pop(ctx); // Cierra el formulario modal
             
-            // Navega directamente a la pantalla de confirmación que querías activar
             Navigator.push(
               context,
               MaterialPageRoute(

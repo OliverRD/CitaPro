@@ -62,17 +62,15 @@ class _CaptchaDialogState extends State<CaptchaDialog> {
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white) // Fondo blanco sólido para liberar memoria RAM del emulador
+      ..setBackgroundColor(Colors.white) 
       ..addJavaScriptChannel(
         'onCaptchaVerified',
         onMessageReceived: (JavaScriptMessage message) {
           if (_isProcesado) return;
           _isProcesado = true;
 
-          // Primero cerramos el diálogo para liberar el hilo de la interfaz
           if (mounted) {
             Navigator.of(context).pop();
-            // Inmediatamente después ejecutamos tu función de éxito para avanzar
             widget.onVerified(message.message);
           }
         },

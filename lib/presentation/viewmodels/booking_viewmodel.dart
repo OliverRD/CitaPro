@@ -253,7 +253,6 @@ class BookingViewModel extends ChangeNotifier {
         });
       }
 
-      // Estructuramos el objeto Booking con la información recolectada antes de limpiar el estado
       final nuevaCitaResp = Booking(
         businessName: nombreNegocio,
         serviceName: serviciosSeleccionados.map((s) => s['nombre']).join(', '),
