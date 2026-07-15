@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../viewmodels/booking_viewmodel.dart';
 import '../../data/models/booking_model.dart';
 import 'reason_cancel_view.dart';
+// 1. IMPORTANTE: Importa aquí tu pantalla de confirmación
+import 'confirmation_screen.dart'; 
 
 class BookingsView extends StatefulWidget {
   final int? idNegocio;
@@ -171,19 +173,15 @@ class _BookingsViewState extends State<BookingsView> {
         child: _FormularioNuevaCita(
           idNegocio: widget.idNegocio!,
           nombreNegocio: widget.nombreNegocio ?? 'Negocio',
-          onExito: () {
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Cita solicitado con éxito',
-                  style: GoogleFonts.poppins(fontSize: 13),
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          // 2. MODIFICADO: Ahora el callback recibe el objeto 'Booking' creado
+          onExito: (Booking nuevaCita) {
+            Navigator.pop(ctx); // Cierra el formulario modal
+            
+            // Navega directamente a la pantalla de confirmación que querías activar
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BookingConfirmationScreen(booking: nuevaCita),
               ),
             );
           },
@@ -657,7 +655,7 @@ class _TarjetaCita extends StatelessWidget {
 class _FormularioNuevaCita extends StatelessWidget {
   final int idNegocio;
   final String nombreNegocio;
-  final VoidCallback onExito;
+  final Function(Booking) onExito; 
 
   const _FormularioNuevaCita({
     required this.idNegocio,
@@ -1017,8 +1015,10 @@ class _FormularioNuevaCita extends StatelessWidget {
                         vm.isGuardando || !vm.formularioValido || vm.isValidando
                             ? null
                             : () async {
-                                final ok = await vm.guardarCita(idNegocio);
-                                if (ok && context.mounted) onExito();
+                                final nuevaCita = await vm.guardarCita(idNegocio, nombreNegocio);
+                                if (nuevaCita != null && context.mounted) {
+                                  onExito(nuevaCita);
+                                }
                               },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4F46E5),
