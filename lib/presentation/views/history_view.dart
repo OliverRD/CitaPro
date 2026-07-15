@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -13,10 +14,7 @@ class HistoryView extends StatefulWidget {
 class _HistoryViewState extends State<HistoryView> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _citas = [];
-
   double _totalGastado = 0.0;
-  int _serviciosCompletados = 0;
-  final double _calificacionMedia = 4.9;
 
   @override
   void initState() {
@@ -26,6 +24,9 @@ class _HistoryViewState extends State<HistoryView> {
 
   Future<void> _cargarHistorial() async {
     try {
+      if (!mounted) return;
+      setState(() => _isLoading = true);
+
       final user = supabase.auth.currentUser;
       if (user == null || user.email == null) {
         if (mounted) setState(() => _isLoading = false);
@@ -58,7 +59,6 @@ class _HistoryViewState extends State<HistoryView> {
           .order('fecha_cita', ascending: false);
 
       double sumatoriaGlobal = 0.0;
-      int completados = 0;
 
       for (var cita in response) {
         final detalles = cita['detalle_cita'] as List<dynamic>? ?? [];
@@ -75,18 +75,13 @@ class _HistoryViewState extends State<HistoryView> {
         }
 
         cita['total_calculado'] = costoTotalCita;
-
-        if (cita['estado'] == 'completado' || cita['estado'] == 'Completado') {
-          completados++;
-          sumatoriaGlobal += costoTotalCita;
-        }
+        sumatoriaGlobal += costoTotalCita;
       }
 
       if (!mounted) return;
       setState(() {
         _citas = response;
         _totalGastado = sumatoriaGlobal;
-        _serviciosCompletados = completados;
         _isLoading = false;
       });
     } catch (e) {
@@ -95,6 +90,87 @@ class _HistoryViewState extends State<HistoryView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error en CitaPro: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _exportarReporte() {
+    if (_citas.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hay datos en el historial para exportar.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    StringBuffer buffer = StringBuffer();
+    buffer.writeln('==================================');
+    buffer.writeln('       REPORTE DE CITAPRO         ');
+    buffer.writeln('==================================');
+    buffer.writeln('Inversión Total: \$${_totalGastado.toStringAsFixed(2)}');
+    buffer.writeln('Total de Citas: ${_citas.length}');
+    buffer.writeln('Fecha de Emisión: ${DateTime.now().toString().substring(0, 16)}');
+    buffer.writeln('==================================\n');
+    buffer.writeln('DETALLE DE SERVICIOS:\n');
+
+    for (var i = 0; i < _citas.length; i++) {
+      final cita = _citas[i];
+      final String negocio = cita['negocio'] != null 
+          ? cita['negocio']['nombre'] ?? 'Establecimiento' 
+          : 'Establecimiento';
+      
+      String servicio = 'Servicio Solicitado';
+      final detalles = cita['detalle_cita'] as List<dynamic>? ?? [];
+      if (detalles.isNotEmpty && detalles.first['servicios'] != null) {
+        servicio = detalles.first['servicios']['nombre'] ?? 'Servicio Solicitado';
+        if (detalles.length > 1) {
+          servicio += ' (+${detalles.length - 1} más)';
+        }
+      }
+
+      final String fecha = cita['fecha_cita'] != null 
+          ? cita['fecha_cita'].toString().substring(0, 10) 
+          : 'Sin fecha';
+      final double total = cita['total_calculado'] ?? 0.0;
+
+      buffer.writeln('${i + 1}. $servicio');
+      buffer.writeln('   Negocio: $negocio');
+      buffer.writeln('   Fecha: $fecha');
+      buffer.writeln('   Costo: \$${total.toStringAsFixed(2)}');
+      buffer.writeln('----------------------------------');
+    }
+
+    Share.share(buffer.toString(), subject: 'Reporte Historial CitaPro');
+  }
+
+  Future<void> _eliminarCita(dynamic idCita, int index) async {
+    try {
+      await supabase.from('detalle_cita').delete().eq('id_cita', idCita);
+      await supabase.from('historial_citas').delete().eq('id_cita', idCita);
+      await supabase.from('citas').delete().eq('id_cita', idCita);
+
+      if (!mounted) return;
+      
+      setState(() {
+        final citaEliminada = _citas[index];
+        _totalGastado -= (citaEliminada['total_calculado'] ?? 0.0);
+        _citas.removeAt(index);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cita eliminada del historial con éxito.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No se pudo eliminar: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -141,7 +217,6 @@ class _HistoryViewState extends State<HistoryView> {
             ),
           ],
         ),
-        actions: const [],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: primaryColor))
@@ -179,7 +254,7 @@ class _HistoryViewState extends State<HistoryView> {
                               ),
                               backgroundColor: cardColor,
                             ),
-                            onPressed: () {},
+                            onPressed: () {}, // Espacio para filtros por fecha en el futuro
                             icon: const Icon(
                               Icons.tune,
                               size: 18,
@@ -205,7 +280,7 @@ class _HistoryViewState extends State<HistoryView> {
                               ),
                               backgroundColor: cardColor,
                             ),
-                            onPressed: () {},
+                            onPressed: _exportarReporte,
                             icon: const Icon(
                               Icons.file_upload_outlined,
                               size: 18,
@@ -229,22 +304,6 @@ class _HistoryViewState extends State<HistoryView> {
                       iconBgColor: Colors.blue[50]!,
                       title: 'TOTAL GASTADO',
                       value: '\$${_totalGastado.toStringAsFixed(2)}',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildStatCard(
-                      icon: Icons.content_cut_rounded,
-                      iconColor: Colors.purple,
-                      iconBgColor: Colors.purple[50]!,
-                      title: 'SERVICIOS COMPLETADOS',
-                      value: '$_serviciosCompletados',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildStatCard(
-                      icon: Icons.star_rounded,
-                      iconColor: Colors.amber,
-                      iconBgColor: Colors.amber[50]!,
-                      title: 'MI CALIFICACIÓN MEDIA',
-                      value: '$_calificacionMedia/5.0',
                     ),
                     const SizedBox(height: 30),
                     const Text(
@@ -273,36 +332,26 @@ class _HistoryViewState extends State<HistoryView> {
                             itemBuilder: (context, index) {
                               final cita = _citas[index];
 
-                              final String nombreNegocio =
-                                  cita['negocio'] != null
-                                      ? cita['negocio']['nombre'] ??
-                                          'Establecimiento'
-                                      : 'Establecimiento';
+                              final String nombreNegocio = cita['negocio'] != null
+                                  ? cita['negocio']['nombre'] ?? 'Establecimiento'
+                                  : 'Establecimiento';
 
                               String nombreEspecialista = 'Por asignar';
                               if (cita['profesionales'] != null &&
                                   cita['profesionales']['usuarios'] != null) {
-                                nombreEspecialista =
-                                    cita['profesionales']['usuarios']['nombreUser'] ??
-                                        'Por asignar';
+                                nombreEspecialista = cita['profesionales']['usuarios']['nombreUser'] ?? 'Por asignar';
                               }
 
                               String nombreServicio = 'Servicio Solicitado';
-                              final detalles =
-                                  cita['detalle_cita'] as List<dynamic>? ?? [];
-                              if (detalles.isNotEmpty &&
-                                  detalles.first['servicios'] != null) {
-                                nombreServicio =
-                                    detalles.first['servicios']['nombre'] ??
-                                        'Servicio Solicitado';
+                              final detalles = cita['detalle_cita'] as List<dynamic>? ?? [];
+                              if (detalles.isNotEmpty && detalles.first['servicios'] != null) {
+                                nombreServicio = detalles.first['servicios']['nombre'] ?? 'Servicio Solicitado';
                                 if (detalles.length > 1) {
-                                  nombreServicio +=
-                                      ' (+${detalles.length - 1})';
+                                  nombreServicio += ' (+${detalles.length - 1})';
                                 }
                               }
 
-                              final double totalCita =
-                                  cita['total_calculado'] ?? 0.0;
+                              final double totalCita = cita['total_calculado'] ?? 0.0;
 
                               String fechaFormateada = 'Sin fecha';
                               if (cita['fecha_cita'] != null) {
@@ -324,6 +373,9 @@ class _HistoryViewState extends State<HistoryView> {
                                   specialistAvatar: cita['especialista_avatar'] ??
                                       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100',
                                   price: '\$${totalCita.toStringAsFixed(2)}',
+                                  onDelete: () {
+                                    _eliminarCita(cita['id_cita'], index);
+                                  },
                                 ),
                               );
                             },
@@ -404,6 +456,7 @@ class _HistoryViewState extends State<HistoryView> {
     required String specialistName,
     required String specialistAvatar,
     required String price,
+    required VoidCallback onDelete,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -475,6 +528,10 @@ class _HistoryViewState extends State<HistoryView> {
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                onPressed: onDelete,
               ),
             ],
           ),

@@ -88,36 +88,39 @@ class ProfileScreen extends StatelessWidget {
     final ImageProvider imageProvider = (fotoUrl != null && fotoUrl.isNotEmpty)
         ? NetworkImage(fotoUrl)
         : const NetworkImage(
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300',
-              )
-              as ImageProvider;
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300',
+            ) as ImageProvider;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
-        /* leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CircleAvatar(backgroundImage: imageProvider),
-        ),*/
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const Text(
-              'Cita',
-              style: TextStyle(
-                color: Color(0xFF334155),
-                fontSize: 22,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-            Text(
-              'Pro',
-              style: TextStyle(
-                color: Colors.blue.shade700,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+            RichText(
+              text: const TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Cita',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.normal,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Pro',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4F46E5),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -125,11 +128,12 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(
-              Icons.notifications_none,
-              color: Color(0xFF475569),
+              Icons.notifications_none_rounded,
+              color: Color(0xFF1E293B),
             ),
             onPressed: () {},
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: viewModel.isLoading
@@ -149,7 +153,7 @@ class ProfileScreen extends StatelessWidget {
                             children: [
                               CircleAvatar(
                                 radius: 50,
-                                backgroundColor: Colors.blue,
+                                backgroundColor: const Color(0xFF4F46E5),
                                 child: CircleAvatar(
                                   radius: 46,
                                   backgroundImage: imageProvider,
@@ -177,7 +181,7 @@ class ProfileScreen extends StatelessWidget {
                                     child: const Icon(
                                       Icons.edit,
                                       size: 18,
-                                      color: Colors.blue,
+                                      color: Color(0xFF4F46E5),
                                     ),
                                   ),
                                 ),
@@ -289,7 +293,7 @@ class ProfileScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF1D4ED8), Color(0xFF6D28D9)],
+                              colors: [Color(0xFF4F46E5), Color(0xFF6366F1)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -321,28 +325,125 @@ class ProfileScreen extends StatelessWidget {
                     ],
                     const SizedBox(height: 20),
 
-                    // Sección Configuración General
+                    // ==========================================
+                    // SECCIÓN DE CONFIGURACIÓN DESPLEGABLE (FIX)
+                    // ==========================================
                     _buildSectionCard(
                       title: 'Configuración',
-                      child: Column(
-                        children: [
-                          _buildConfigRow(Icons.credit_card, 'Métodos de Pago'),
-                          const Divider(),
-                          _buildConfigRow(
-                            Icons.location_on_outlined,
-                            'Direcciones Guardadas',
-                          ),
-                          const Divider(),
-                          _buildConfigRow(
-                            Icons.notifications_outlined,
-                            'Preferencias de Notificación',
-                          ),
-                          const Divider(),
-                          _buildConfigRow(
-                            Icons.lock_outline,
-                            'Seguridad y Privacidad',
-                          ),
-                        ],
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          dividerColor: Colors.transparent, // Quita las líneas internas molestas del tile
+                        ),
+                        child: Column(
+                          children: [
+                            // 1. Métodos de Pago
+                            _buildExpandableRow(
+                              icon: Icons.credit_card,
+                              label: 'Métodos de Pago',
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(Icons.add_circle_outline, color: Color(0xFF4F46E5), size: 20),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Agregar nueva tarjeta',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF4F46E5),
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12),
+                                      Text(
+                                        'No tienes métodos de pago guardados.',
+                                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+                            // 2. Direcciones Guardadas
+                            _buildExpandableRow(
+                              icon: Icons.location_on_outlined,
+                              label: 'Direcciones Guardadas',
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      OutlinedButton.icon(
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(color: Color(0xFF4F46E5)),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        ),
+                                        onPressed: () {},
+                                        icon: const Icon(Icons.my_location, size: 16, color: Color(0xFF4F46E5)),
+                                        label: const Text('Usar ubicación actual', style: TextStyle(color: Color(0xFF4F46E5))),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text(
+                                        'No has agregado direcciones de entrega/servicio.',
+                                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+                            // 3. Preferencias de Notificación
+                            _buildExpandableRow(
+                              icon: Icons.notifications_outlined,
+                              label: 'Preferencias de Notificación',
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                                  child: Column(
+                                    children: [
+                                      _buildSwitchRow('Notificaciones Push', true),
+                                      _buildSwitchRow('Alertas por Correo', false),
+                                      _buildSwitchRow('Recordatorios de Citas', true),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 1, color: Color(0xFFF1F5F9)),
+
+                            // 4. Seguridad y Privacidad
+                            _buildExpandableRow(
+                              icon: Icons.lock_outline,
+                              label: 'Seguridad y Privacidad',
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildActionLink('Cambiar contraseña de CitaPro'),
+                                      const SizedBox(height: 12),
+                                      _buildActionLink('Autenticación de dos pasos (MFA)'),
+                                      const SizedBox(height: 12),
+                                      _buildActionLink('Políticas de Privacidad de Datos'),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -465,9 +566,68 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildConfigRow(IconData icon, String label) {
     return ListTile(
-      leading: Icon(icon, color: Colors.blue),
+      leading: Icon(icon, color: const Color(0xFF4F46E5)),
       title: Text(label, style: const TextStyle(fontSize: 14)),
       trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+    );
+  }
+
+  // WIDGET AUXILIAR: Crea cada fila desplegable elegante
+  Widget _buildExpandableRow({
+    required IconData icon,
+    required String label,
+    required List<Widget> children,
+  }) {
+    return ExpansionTile(
+      leading: Icon(icon, color: const Color(0xFF4F46E5)),
+      title: Text(
+        label,
+        style: const TextStyle(fontSize: 14, color: Color(0xFF1E293B)),
+      ),
+      iconColor: const Color(0xFF4F46E5),
+      collapsedIconColor: Colors.grey,
+      childrenPadding: const EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0),
+      expandedAlignment: Alignment.topLeft,
+      children: children,
+    );
+  }
+
+  // WIDGET AUXILIAR: Switch elegante para los ajustes de notificaciones
+  Widget _buildSwitchRow(String title, bool initialValue) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 13, color: Color(0xFF475569))),
+            Switch(
+              value: initialValue,
+              activeColor: const Color(0xFF4F46E5),
+              onChanged: (val) {
+                setState(() {
+                  initialValue = val;
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // WIDGET AUXILIAR: Enlaces de acción para seguridad y políticas
+  Widget _buildActionLink(String text) {
+    return InkWell(
+      onTap: () {},
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF4F46E5),
+          fontWeight: FontWeight.bold,
+          fontSize: 13,
+          decoration: TextDecoration.underline,
+        ),
+      ),
     );
   }
 }
