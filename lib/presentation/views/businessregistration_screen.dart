@@ -1,11 +1,33 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_application_1/presentation/views/captcha_screen.dart';
+// Importamos el componente desde su ubicación correcta
+import 'package:flutter_application_1/presentation/widgets/captcha_dialog.dart';
 import 'package:flutter_application_1/presentation/views/category_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class BusinessIntroView extends StatelessWidget {
   const BusinessIntroView({super.key});
+
+  // Función interna para validar el CAPTCHA antes de continuar
+  void _validarAcceso(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Forzar a que responda el CAPTCHA
+      builder: (context) {
+        return CaptchaDialog(
+          onVerified: (tokenRecibido) {
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const CategoryScreen(),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +132,7 @@ class BusinessIntroView extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 14,
-                      ),
+                  ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
@@ -127,14 +149,7 @@ class BusinessIntroView extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CategoryScreen(),
-                          ),
-                        );
-                      },
+                      onPressed: () => _validarAcceso(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2563EB),
                         padding: const EdgeInsets.symmetric(vertical: 14),

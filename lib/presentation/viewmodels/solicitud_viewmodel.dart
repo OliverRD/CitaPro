@@ -5,7 +5,6 @@ import 'package:flutter_application_1/data/repositories/solicitud_repository.dar
 class SolicitudViewModel extends ChangeNotifier {
   final SolicitudRepository _repository = SolicitudRepository();
 
-  // Controladores paso 1
   final nombreController = TextEditingController();
   final telefonoController = TextEditingController();
   final descripcionController = TextEditingController();
@@ -14,7 +13,6 @@ class SolicitudViewModel extends ChangeNotifier {
   final whatsappController = TextEditingController();
   final tiktokController = TextEditingController();
 
-  // Controladores paso 2
   final direccionController = TextEditingController();
   final ciudadController = TextEditingController();
   final provinciaController = TextEditingController();
@@ -25,12 +23,10 @@ class SolicitudViewModel extends ChangeNotifier {
   String? error;
   bool enviado = false;
 
-  // Validaciones paso 1
   bool get paso1Valido =>
       nombreController.text.trim().isNotEmpty &&
       descripcionController.text.trim().length >= 20;
 
-  // Validaciones paso 2
   bool get paso2Valido =>
       direccionController.text.trim().isNotEmpty &&
       ciudadController.text.trim().isNotEmpty &&

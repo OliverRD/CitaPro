@@ -96,7 +96,6 @@ class AuthRepositoryImpl implements AuthRepository {
           .select()
           .eq('auth_id', user.id);
 
-      // Si el Trigger procesó la entrada de Google con éxito, retornamos el perfil obtenido.
       if (data.isNotEmpty) {
         return data.first;
       }

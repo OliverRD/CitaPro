@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/booking_viewmodel.dart';
 import '../../data/models/booking_model.dart';
 import 'reason_cancel_view.dart';
+import 'confirmation_screen.dart'; 
 
 class BookingsView extends StatefulWidget {
   final int? idNegocio;
@@ -19,16 +20,17 @@ class _BookingsViewState extends State<BookingsView> {
   @override
   void initState() {
     super.initState();
-    final vm = Provider.of<BookingViewModel>(context, listen: false);
-    vm.cargarMisCitas();
 
-    // Si viene desde HomeView con un negocio seleccionado,
-    // carga servicios y profesionales automáticamente
+    final vm = Provider.of<BookingViewModel>(context, listen: false);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      vm.cargarMisCitas();
+    });
+
     if (widget.idNegocio != null) {
-      vm.cargarServicios(widget.idNegocio!);
-      vm.cargarProfesionales(widget.idNegocio!);
-      // Abre el formulario de nueva cita automáticamente
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        vm.cargarServicios(widget.idNegocio!);
+        vm.cargarProfesionales(widget.idNegocio!);
         _mostrarFormularioNuevaCita(context, vm);
       });
     }
@@ -101,8 +103,6 @@ class _BookingsViewState extends State<BookingsView> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Lista de reservas directas sin Tabs intermedios
               Expanded(
                 child: vm.isLoading
                     ? const Center(
@@ -168,23 +168,17 @@ class _BookingsViewState extends State<BookingsView> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) => ChangeNotifierProvider.value(
-        value: vm, // ← pasa el mismo vm al BottomSheet
+        value: vm,
         child: _FormularioNuevaCita(
           idNegocio: widget.idNegocio!,
           nombreNegocio: widget.nombreNegocio ?? 'Negocio',
-          onExito: () {
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Cita solicitada con éxito',
-                  style: GoogleFonts.poppins(fontSize: 13),
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+          onExito: (Booking nuevaCita) {
+            Navigator.pop(ctx); // Cierra el formulario modal
+            
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BookingConfirmationScreen(booking: nuevaCita),
               ),
             );
           },
@@ -398,18 +392,8 @@ class _TarjetaCita extends StatelessWidget {
     try {
       final dt = DateTime.parse(fecha);
       const meses = [
-        'ene',
-        'feb',
-        'mar',
-        'abr',
-        'may',
-        'jun',
-        'jul',
-        'ago',
-        'sep',
-        'oct',
-        'nov',
-        'dic',
+        'ene', 'feb', 'mar', 'abr', 'may', 'jun',
+        'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
       ];
       return '${dt.day} ${meses[dt.month - 1]} ${dt.year}';
     } catch (_) {
@@ -528,8 +512,6 @@ class _TarjetaCita extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 14),
-
-            // Fecha y hora
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
@@ -620,8 +602,6 @@ class _TarjetaCita extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            // Total
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -642,8 +622,6 @@ class _TarjetaCita extends StatelessWidget {
                 ),
               ],
             ),
-
-            // Botón cancelar solo para citas activas
             if (esProxima &&
                 ['pendiente', 'confirmada'].contains(booking.status)) ...[
               const SizedBox(height: 12),
@@ -674,7 +652,7 @@ class _TarjetaCita extends StatelessWidget {
 class _FormularioNuevaCita extends StatelessWidget {
   final int idNegocio;
   final String nombreNegocio;
-  final VoidCallback onExito;
+  final Function(Booking) onExito; 
 
   const _FormularioNuevaCita({
     required this.idNegocio,
@@ -720,8 +698,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Servicios
                 Text(
                   'Servicios',
                   style: GoogleFonts.poppins(
@@ -773,8 +749,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                           }).toList(),
                         ),
                       ),
-
-                // Total dinámico
                 if (vm.serviciosSeleccionados.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Container(
@@ -809,8 +783,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                   ),
                 ],
                 const SizedBox(height: 16),
-
-                // Profesional
                 Text(
                   'Profesional',
                   style: GoogleFonts.poppins(
@@ -871,8 +843,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                         ),
                       ),
                 const SizedBox(height: 16),
-
-                // Fecha y hora
                 Row(
                   children: [
                     Expanded(
@@ -931,8 +901,6 @@ class _FormularioNuevaCita extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-
-                // Indicador disponibilidad
                 if (vm.isValidando)
                   Row(
                     children: [
@@ -1018,10 +986,7 @@ class _FormularioNuevaCita extends StatelessWidget {
                       ],
                     ),
                   ),
-
                 const SizedBox(height: 16),
-
-                // Error
                 if (vm.errorFormulario != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
@@ -1040,18 +1005,18 @@ class _FormularioNuevaCita extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                // Botón
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed:
                         vm.isGuardando || !vm.formularioValido || vm.isValidando
-                        ? null
-                        : () async {
-                            final ok = await vm.guardarCita(idNegocio);
-                            if (ok && context.mounted) onExito();
-                          },
+                            ? null
+                            : () async {
+                                final nuevaCita = await vm.guardarCita(idNegocio, nombreNegocio);
+                                if (nuevaCita != null && context.mounted) {
+                                  onExito(nuevaCita);
+                                }
+                              },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4F46E5),
                       disabledBackgroundColor: const Color(0xFFCBD5E1),
@@ -1070,9 +1035,7 @@ class _FormularioNuevaCita extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            ocupado
-                                ? 'Horario no disponible'
-                                : 'Solicitar cita',
+                            ocupado ? 'Horario no disponible' : 'Solicitar cita',
                             style: GoogleFonts.poppins(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,

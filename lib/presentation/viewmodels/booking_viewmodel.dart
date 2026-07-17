@@ -201,8 +201,9 @@ class BookingViewModel extends ChangeNotifier {
       horaSeleccionada != null &&
       !profesionalOcupado;
 
-  Future<bool> guardarCita(int idNegocio) async {
-    if (!formularioValido) return false;
+  // Cambiado de bool a Booking? para capturar los datos antes de eliminarlos del formulario
+  Future<Booking?> guardarCita(int idNegocio, String nombreNegocio) async {
+    if (!formularioValido) return null;
 
     isGuardando = true;
     errorFormulario = null;
@@ -252,20 +253,34 @@ class BookingViewModel extends ChangeNotifier {
         });
       }
 
+      final nuevaCitaResp = Booking(
+        businessName: nombreNegocio,
+        serviceName: serviciosSeleccionados.map((s) => s['nombre']).join(', '),
+        date: fechaStr,
+        time: horaStr.substring(0, 5), // Format HH:MM
+        status: 'pendiente',
+        idCita: idCita,
+        idNegocio: idNegocio,
+        idServicio: serviciosSeleccionados.first['id_servicio'] as int, // Assuming idServicio is required and taking the first one
+        idProfesional: idProfesional,
+        nombreProfesional: profesionalSeleccionado!['usuarios']['nombreUser'] as String,
+        total: totalCalculado,
+      );
+
       _limpiarFormulario();
       await cargarMisCitas();
-      return true;
+      
+      return nuevaCitaResp; 
     } catch (e) {
       errorFormulario = 'Error al guardar la cita: $e';
       print('Error guardando cita: $e');
-      return false;
+      return null;
     } finally {
       isGuardando = false;
       notifyListeners();
     }
   }
 
-  // ── Cancelar cita ────────────────────────────────────────────
   Future<bool> cancelarCita(int idCita) async {
     try {
       await _supabase

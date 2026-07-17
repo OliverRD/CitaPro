@@ -83,13 +83,11 @@ class ClientesRepository implements IClientesRepository {
 
     final totalAtendidos = clienteFechas.keys.length;
 
-    // Nuevos: primera cita en últimos 30 días
     final nuevos = clienteFechas.values.where((fechas) {
       final primera = fechas.reduce((a, b) => a.isBefore(b) ? a : b);
       return primera.isAfter(hace30Dias);
     }).length;
 
-    // Frecuentes: más de 6 citas
     final frecuentes = clienteFechas.values.where((f) => f.length > 6).length;
 
     return EstadisticasClientesEntity(
